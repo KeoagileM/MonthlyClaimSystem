@@ -1,0 +1,55 @@
+﻿@model IEnumerable<ClaimSystem.Models.Claim>
+@{
+    <link href="~/css/site.css" rel="stylesheet" type="text/css" />
+    ViewBag.Title = "Lecture Dashboard";
+}
+<h2>Lecturer Dashboard</h2>
+
+<!-- Quick Submit Form -->
+@using (Html.BeginForm("SubmitClaim", "Lecture", FormMethod.Post))
+{
+    <label>Hours Worked</label>
+    <input type="number" name="HoursWorked" required />
+
+    <label>Hourly Rate</label>
+    <input type="number" step="0.01" name="HourlyRate" required />
+
+    <label>Document Name / Description</label>
+    <input type="text" name="DocumentPath" placeholder="Timesheet.pdf" />
+
+    <button type="submit">Submit Claim</button>
+}
+
+<hr />
+
+<!-- Claim History -->
+<h3>Claim History</h3>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Date</th>
+        <th>Hours</th>
+        <th>Rate</th>
+        <th>Status</th>
+        <th>Document</th>
+    </tr>
+
+    @if (Model != null && Model.Any())
+    {
+        foreach (var claim in Model)
+        {
+            <tr>
+                <td>@claim.DateSubmitted.ToShortDateString()</td>
+                <td>@claim.HoursWorked</td>
+                <td>@claim.HourlyRate</td>
+                <td>@claim.Status</td>
+                <td>@claim.DocumentPath</td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr>
+            <td colspan="5">No claims submitted yet</td>
+        </tr>
+    }
+</table>

@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - CMCS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="~/css/site.css" rel="stylesheet" />
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <h1>CMCS</h1>
+            </div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/Lecture/Dashboard">Lecturer Dashboard</a>
+                <a href="#">Programme Coordinator</a>
+                <a href="#">HR</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <footer>
+        <p>&copy; @DateTime.Now.Year - Contract Monthly Claim System</p>
+    </footer>
+</body>
+</html>

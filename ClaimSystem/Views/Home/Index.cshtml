@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "Welcome - CMCS";
+}
+
+<div class="home">
+    <h1>Welcome to the Contract Monthly Claim System (CMCS)</h1>
+    <p>Select your role to continue:</p>
+
+    <div class="role-cards">
+        <a href="@Url.Action("Dashboard","Lecture")" class="card lecturer">
+            <h2>Lecturer</h2>
+            <p>Submit and track your monthly claims.</p>
+        </a>
+
+        <a href="/Coordinator/Dashboard" class="card coordinator">
+            <h2>Programme Coordinator</h2>
+            <p>Review, approve or reject lecturer claims.</p>
+        </a>
+
+        <a href="/HR/Dashboard" class="card hr">
+            <h2>HR</h2>
+            <p>View reports and claim statistics.</p>
+        </a>
+    </div>
+</div>
