@@ -1,0 +1,188 @@
+﻿/* ===== Base Page ===== */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f9f9f9;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-top: 0;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: gray;
+    color: #fff;
+    padding: 20px;
+    font-size: large;
+    border-bottom: 2px solid #444;
+}
+
+    .navbar .logo h1 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .navbar nav a {
+        color: #fff;
+        text-decoration: none;
+        margin-left: 20px;
+        font-weight: 500;
+    }
+
+        .navbar nav a:hover {
+            text-decoration: underline;
+        }
+
+/* ===== Container ===== */
+.container {
+    padding: 20px;
+    min-height: 80vh;
+}
+
+/* ===== Footer ===== */
+footer {
+    text-align: center;
+    padding: 15px;
+    background: #f5f5f5;
+    border-top: 1px solid #ddd;
+    margin-top: 20px;
+}
+
+/* ===== Gradient Card (like screenshot) ===== */
+.gradient-card,
+.card {
+    background: linear-gradient(to bottom, #666, #f9f9f9);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    color: #000;
+}
+
+/* ===== Stacked Form ===== */
+.form-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+    .form-group label {
+        font-weight: bold;
+    }
+
+    .form-group input {
+        width: 100%;
+        max-width: 450px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 15px;
+    }
+
+/* ===== Full-Width Button ===== */
+button,
+.full-btn {
+    width: 100%;
+    padding: 14px;
+    background: gray;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    button:hover,
+    .full-btn:hover {
+        background: #444;
+    }
+
+/* ===== Claim History Table ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+    table th, table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+
+    table th {
+        background: #f2f2f2;
+    }
+
+/* ===== Claim Status Labels ===== */
+.status.pending {
+    color: orange;
+    font-weight: bold;
+}
+
+.status.approved {
+    color: green;
+    font-weight: bold;
+}
+
+.status.rejected {
+    color: red;
+    font-weight: bold;
+}
+
+/* ===== Home Page ===== */
+.home {
+    text-align: center;
+    padding: 40px;
+}
+
+    .home h1 {
+        margin-bottom: 10px;
+    }
+
+    .home p {
+        font-size: 16px;
+        color: #555;
+    }
+
+/* ===== Role Cards ===== */
+.role-cards {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+    .role-cards .card {
+        display: block;
+        width: 250px;
+        padding: 20px;
+        border-radius: 12px;
+        text-decoration: none;
+        color: #000;
+        font-weight: bold;
+        background: linear-gradient(to bottom, #666, #f9f9f9);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .role-cards .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+        }
