@@ -170,15 +170,9 @@ table {
 }
 
     .role-cards .card {
-        display: block;
         width: 250px;
-        padding: 20px;
-        border-radius: 12px;
-        text-decoration: none;
-        color: #000;
         font-weight: bold;
-        background: linear-gradient(to bottom, #666, #f9f9f9);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        background: linear-gradient(gray, white);
         transition: transform 0.2s, box-shadow 0.2s;
     }
 
