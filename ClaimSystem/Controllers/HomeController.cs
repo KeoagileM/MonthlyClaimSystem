@@ -6,24 +6,42 @@ namespace ClaimSystem.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
         public IActionResult Index()
         {
             return View();
         }
 
-        
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        // GET: Login
+        public IActionResult Login(string role)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            ViewBag.Role = role;
+            return View();
+        }
+
+        // POST: Login
+        [HttpPost]
+        public IActionResult Login(string username, string password, string role)
+        {
+            if (Users.Accounts.ContainsKey(username) &&
+                Users.Accounts[username].Password == password &&
+                Users.Accounts[username].Role == role)
+            {
+                HttpContext.Session.SetString("Role", role);
+
+                if (role == "Lecturer") return RedirectToAction("Dashboard", "Lecture");
+                if (role == "Coordinator") return RedirectToAction("Dashboard", "Coordinator");
+                if (role == "Manager") return RedirectToAction("Dashboard", "Manager");
+            }
+
+            ViewBag.Error = "Invalid login.";
+            ViewBag.Role = role;
+            return View();
+        }
+
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index");
         }
     }
 }

@@ -1,0 +1,31 @@
+﻿@{
+    ViewBag.Title = "Login - " + ViewBag.Role;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    <link rel="stylesheet" href="~/css/site.css">
+
+}
+
+<div class="card gradient-card">
+    <h3>Login as @ViewBag.Role</h3>
+
+    @if (ViewBag.Error != null)
+    {
+        <p style="color:red">@ViewBag.Error</p>
+    }
+
+    <form method="post">
+        <input type="hidden" name="role" value="@ViewBag.Role" />
+
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" required />
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required />
+        </div>
+
+        <button type="submit">Login</button>
+    </form>
+</div>

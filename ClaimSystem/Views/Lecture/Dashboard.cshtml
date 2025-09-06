@@ -2,15 +2,37 @@
 @{
     ViewBag.Title = "Lecturer Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    <link rel="stylesheet" href="~/css/site.css">
 }
 
 <h2>Lecturer Dashboard</h2>
 
-<!-- Quick Submit Form -->
+<!-- Submit Form -->
 @using (Html.BeginForm("SubmitClaim", "Lecture", FormMethod.Post))
 {
     <div class="card gradient-card form-stack">
         <h3>Quick Submit</h3>
+
+        <div class="form-group">
+            <label>Employee Number</label>
+            <input type="text" name="EmployeeNumber" required />
+        </div>
+
+        <div class="form-group">
+            <label>Lecturer Name</label>
+            <input type="text" name="LecturerName" required />
+        </div>
+
+        <div class="form-group">
+            <label>Module</label>
+            <select name="Module" required>
+                <option value="">-- Select Module --</option>
+                @foreach (var module in ViewBag.Modules as List<string>)
+                {
+                    <option value="@module">@module</option>
+                }
+            </select>
+        </div>
 
         <div class="form-group">
             <label>Hours Worked</label>
@@ -37,9 +59,13 @@
     <table>
         <thead>
             <tr>
+                <th>Employee No.</th>
+                <th>Lecturer Name</th>
+                <th>Module</th>
                 <th>Date</th>
-                <th>Hours</th>
                 <th>Rate</th>
+                <th>Hours</th>
+                <th>Total</th>
                 <th>Status</th>
                 <th>Document</th>
             </tr>
@@ -50,9 +76,13 @@
                 foreach (var claim in Model)
                 {
                     <tr>
+                        <td>@claim.EmployeeNumber</td>
+                        <td>@claim.LecturerName</td>
+                        <td>@claim.Module</td>
                         <td>@claim.DateSubmitted.ToShortDateString()</td>
-                        <td>@claim.HoursWorked</td>
                         <td>@claim.HourlyRate</td>
+                        <td>@claim.HoursWorked</td>
+                        <td>@claim.TotalAmount</td>
                         <td><span class="status @claim.Status.ToLower()">@claim.Status</span></td>
                         <td>@claim.DocumentPath</td>
                     </tr>
@@ -60,7 +90,7 @@
             }
             else
             {
-                <tr><td colspan="5">No claims submitted yet</td></tr>
+                <tr><td colspan="9">No claims submitted yet</td></tr>
             }
         </tbody>
     </table>

@@ -5,36 +5,38 @@ namespace ClaimSystem.Controllers
 {
     public class LectureController : Controller
     {
-        // Static list so the data persists across requests
-        private static List<Claim> claims = new List<Claim>
-        {
-            new Claim { Id = 1, DateSubmitted = DateTime.Now, HoursWorked = 5, HourlyRate = 200, Status = "Approved", DocumentPath = "TestDoc.pdf" }
-        };
+        public static List<Claim> Claims = new List<Claim>();
 
-        // GET: /Lecture/Dashboard
-        public ActionResult Dashboard()
+        public IActionResult Dashboard()
         {
-            // Always send a valid list
-            return View(claims ?? new List<Claim>());
+            if (HttpContext.Session.GetString("Role") != "Lecturer")
+                return RedirectToAction("Index", "Home");
+
+            ViewBag.Modules = new List<string> { "PROG5121", "PRLD5121", "PROG6112", "WEDE5121" };
+            return View(Claims ?? new List<Claim>());
         }
 
-        // POST: /Lecture/SubmitClaim
         [HttpPost]
-        public ActionResult SubmitClaim(Claim claim)
+        public IActionResult SubmitClaim(Claim claim)
         {
+            if (HttpContext.Session.GetString("Role") != "Lecturer")
+                return RedirectToAction("Index", "Home");
+
             if (claim != null)
             {
-                claim.Id = claims.Count + 1;
+                claim.Id = Claims.Count + 1;
                 claim.DateSubmitted = DateTime.Now;
                 claim.Status = "Pending";
+                claim.TotalAmount = claim.HoursWorked * claim.HourlyRate;
 
                 if (string.IsNullOrEmpty(claim.DocumentPath))
                     claim.DocumentPath = "No Document";
 
-                claims.Add(claim);
+                Claims.Add(claim);
             }
 
             return RedirectToAction("Dashboard");
         }
     }
+
 }

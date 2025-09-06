@@ -2,12 +2,12 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    background: #f9f9f9;
-    color: #333;
+    background: white;
+    color: black;
 }
 
 h1, h2, h3 {
-    margin-top: 0;
+    margin-top: 10px;
 }
 
 /* ===== Navbar ===== */
@@ -16,8 +16,8 @@ h1, h2, h3 {
     justify-content: space-between;
     align-items: center;
     background: gray;
-    color: #fff;
-    padding: 20px;
+    color: white;
+    padding: 30px;
     font-size: large;
     border-bottom: 2px solid #444;
 }
@@ -74,11 +74,11 @@ footer {
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
 }
 
     .form-group label {
         font-weight: bold;
+        margin-top: 10px
     }
 
     .form-group input {
@@ -93,20 +93,20 @@ footer {
 /* ===== Full-Width Button ===== */
 button,
 .full-btn {
-    width: 100%;
+    width: 50%;
     padding: 14px;
-    background: gray;
+    background: black;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 10px;
     font-weight: bold;
-    cursor: pointer;
     transition: background 0.2s;
+    margin-top: 10px
 }
 
     button:hover,
     .full-btn:hover {
-        background: #444;
+        background: gray;
     }
 
 /* ===== Claim History Table ===== */

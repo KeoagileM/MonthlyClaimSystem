@@ -1,0 +1,62 @@
+﻿@model IEnumerable<ClaimSystem.Models.Claim>
+@{
+    ViewBag.Title = "Programme Coordinator Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Programme Coordinator Dashboard</h2>
+
+<div class="card gradient-card">
+    <h3>Claims Review</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Employee No.</th>
+                <th>Lecturer Name</th>
+                <th>Module</th>
+                <th>Date</th>
+                <th>Rate</th>
+                <th>Hours</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Document</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var claim in Model)
+            {
+                <tr>
+                    <td>@claim.EmployeeNumber</td>
+                    <td>@claim.LecturerName</td>
+                    <td>@claim.Module</td>
+                    <td>@claim.DateSubmitted.ToShortDateString()</td>
+                    <td>@claim.HourlyRate</td>
+                    <td>@claim.HoursWorked</td>
+                    <td>@claim.TotalAmount</td>
+                    <td><span class="status @claim.Status.ToLower().Replace(" ", "-")">@claim.Status</span></td>
+                    <td>@claim.DocumentPath</td>
+                    <td>
+                        @if (claim.Status == "Pending")
+                        {
+                            using (Html.BeginForm("Approve", "Coordinator", FormMethod.Post))
+                            {
+                                @Html.Hidden("id", claim.Id)
+                                <button type="submit">Approve</button>
+                            }
+                            using (Html.BeginForm("Disapprove", "Coordinator", FormMethod.Post))
+                            {
+                                @Html.Hidden("id", claim.Id)
+                                <button type="submit" style="background:orange;">Disapprove</button>
+                            }
+                        }
+                        else
+                        {
+                            <em>Reviewed</em>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
