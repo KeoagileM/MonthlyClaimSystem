@@ -1,31 +1,29 @@
 ﻿@{
-    ViewBag.Title = "Login - " + ViewBag.Role;
+    ViewBag.Title = "Login";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var role = ViewBag.Role as string ?? "";
     <link rel="stylesheet" href="~/css/site.css">
-
 }
 
-<div class="card gradient-card">
-    <h3>Login as @ViewBag.Role</h3>
+<div class="card">
+    <h3>Login as @role</h3>
 
     @if (ViewBag.Error != null)
     {
         <p style="color:red">@ViewBag.Error</p>
     }
 
-    <form method="post">
-        <input type="hidden" name="role" value="@ViewBag.Role" />
-
+    <form method="post" asp-action="Login" asp-controller="Home">
+        <input type="hidden" name="role" value="@role" />
         <div class="form-group">
             <label>Username</label>
             <input type="text" name="username" required />
         </div>
-
         <div class="form-group">
             <label>Password</label>
             <input type="password" name="password" required />
         </div>
-
         <button type="submit">Login</button>
     </form>
 </div>
+

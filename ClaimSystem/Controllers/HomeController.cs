@@ -11,29 +11,34 @@ namespace ClaimSystem.Controllers
             return View();
         }
 
-        // GET: Login
+        // GET: /Home/Login?role=Lecturer (role param optional)
         public IActionResult Login(string role)
         {
             ViewBag.Role = role;
             return View();
         }
 
-        // POST: Login
         [HttpPost]
         public IActionResult Login(string username, string password, string role)
         {
-            if (Users.Accounts.ContainsKey(username) &&
-                Users.Accounts[username].Password == password &&
-                Users.Accounts[username].Role == role)
+            if (!string.IsNullOrEmpty(username) && Users.Accounts.TryGetValue(username, out var acc))
             {
-                HttpContext.Session.SetString("Role", role);
+                if (acc.Password == password && acc.Role == role)
+                {
+                    HttpContext.Session.SetString("Role", role);
+                    HttpContext.Session.SetString("Username", username);
 
-                if (role == "Lecturer") return RedirectToAction("Dashboard", "Lecture");
-                if (role == "Coordinator") return RedirectToAction("Dashboard", "Coordinator");
-                if (role == "Manager") return RedirectToAction("Dashboard", "Manager");
+                    return role switch
+                    {
+                        "Lecturer" => RedirectToAction("Dashboard", "Lecture"),
+                        "Coordinator" => RedirectToAction("Dashboard", "Coordinator"),
+                        "Manager" => RedirectToAction("Dashboard", "Manager"),
+                        _ => RedirectToAction("Index")
+                    };
+                }
             }
 
-            ViewBag.Error = "Invalid login.";
+            ViewBag.Error = "Invalid username, password, or role.";
             ViewBag.Role = role;
             return View();
         }

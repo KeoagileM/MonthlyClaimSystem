@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "Programme Coordinator Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    <link rel="stylesheet" href="~/css/site.css">
 }
 
 <h2>Programme Coordinator Dashboard</h2>
@@ -20,6 +21,7 @@
                 <th>Total</th>
                 <th>Status</th>
                 <th>Document</th>
+                <th>Rejection Reason</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -34,8 +36,25 @@
                     <td>@claim.HourlyRate</td>
                     <td>@claim.HoursWorked</td>
                     <td>@claim.TotalAmount</td>
-                    <td><span class="status @claim.Status.ToLower().Replace(" ", "-")">@claim.Status</span></td>
-                    <td>@claim.DocumentPath</td>
+                    <td>
+                        <span class="status @claim.Status.ToLower().Replace(" ", "-")">@claim.Status</span>
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(claim.DocumentPath))
+                        {
+                            <a href="@claim.DocumentPath" target="_blank">View Document</a>
+                        }
+                        else
+                        {
+                            <em>No document</em>
+                        }
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(claim.RejectionReason))
+                        {
+                            <em>@claim.RejectionReason</em>
+                        }
+                    </td>
                     <td>
                         @if (claim.Status == "Pending")
                         {
@@ -44,11 +63,12 @@
                                 @Html.Hidden("id", claim.Id)
                                 <button type="submit">Approve</button>
                             }
-                            using (Html.BeginForm("Disapprove", "Coordinator", FormMethod.Post))
-                            {
-                                @Html.Hidden("id", claim.Id)
-                                <button type="submit" style="background:orange;">Disapprove</button>
-                            }
+
+                            <form asp-action="Disapprove" asp-controller="Coordinator" method="post" style="margin-top:8px;">
+                                <input type="hidden" name="id" value="@claim.Id" />
+                                <textarea name="rejectionReason" placeholder="Reason..." rows="2" style="width:150px;"></textarea><br />
+                                <button type="submit" class="warning">Disapprove</button>
+                            </form>
                         }
                         else
                         {

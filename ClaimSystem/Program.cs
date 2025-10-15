@@ -4,13 +4,12 @@ using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services
 builder.Services.AddControllersWithViews();
-
-// Enable sessions
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -29,6 +28,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseSession();
+
 app.UseAuthorization();
 
 app.MapControllerRoute(

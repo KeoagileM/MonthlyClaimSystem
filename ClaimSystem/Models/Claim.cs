@@ -11,8 +11,8 @@
         public int HoursWorked { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
-        public string DocumentPath { get; set; }
-
+        public string DocumentPath { get; set; }      // relative path under wwwroot
+        public string RejectionReason { get; set; }   // from coordinator
     }
-    
+
 }

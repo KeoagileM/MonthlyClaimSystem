@@ -5,36 +5,61 @@ namespace ClaimSystem.Controllers
 {
     public class LectureController : Controller
     {
-        public static List<Claim> Claims = new List<Claim>();
+        // Shared in-memory store (replace with DB in real app)
+        public static List<Claim> Claims { get; } = new List<Claim>();
 
         public IActionResult Dashboard()
         {
-            if (HttpContext.Session.GetString("Role") != "Lecturer")
-                return RedirectToAction("Index", "Home");
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "Lecturer") return RedirectToAction("Index", "Home");
 
-            ViewBag.Modules = new List<string> { "PROG5121", "PRLD5121", "PROG6112", "WEDE5121" };
-            return View(Claims ?? new List<Claim>());
+            // pass all claims (in production filter to logged-in lecturer)
+            return View(Claims);
         }
 
         [HttpPost]
-        public IActionResult SubmitClaim(Claim claim)
+        public IActionResult SubmitClaim(
+            string EmployeeNumber,
+            string LecturerName,
+            string Module,
+            DateTime DateSubmitted,
+            decimal HourlyRate,
+            int HoursWorked,
+            IFormFile Document)
         {
-            if (HttpContext.Session.GetString("Role") != "Lecturer")
-                return RedirectToAction("Index", "Home");
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "Lecturer") return RedirectToAction("Index", "Home");
 
-            if (claim != null)
+            string filePath = null;
+            if (Document != null && Document.Length > 0)
             {
-                claim.Id = Claims.Count + 1;
-                claim.DateSubmitted = DateTime.Now;
-                claim.Status = "Pending";
-                claim.TotalAmount = claim.HoursWorked * claim.HourlyRate;
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Documents");
+                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
 
-                if (string.IsNullOrEmpty(claim.DocumentPath))
-                    claim.DocumentPath = "No Document";
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(Document.FileName)}";
+                var fullPath = Path.Combine(uploadsFolder, uniqueFileName);
+                using var stream = new FileStream(fullPath, FileMode.Create);
+                Document.CopyTo(stream);
 
-                Claims.Add(claim);
+                filePath = $"/Documents/{uniqueFileName}"; // relative to web root
             }
 
+            var claim = new Claim
+            {
+                Id = Claims.Count + 1,
+                EmployeeNumber = EmployeeNumber,
+                LecturerName = LecturerName,
+                Module = Module,
+                DateSubmitted = DateSubmitted == default ? DateTime.Now : DateSubmitted,
+                HourlyRate = HourlyRate,
+                HoursWorked = HoursWorked,
+                TotalAmount = HourlyRate * HoursWorked,
+                DocumentPath = filePath,
+                Status = "Pending",
+                RejectionReason = null
+            };
+
+            Claims.Add(claim);
             return RedirectToAction("Dashboard");
         }
     }

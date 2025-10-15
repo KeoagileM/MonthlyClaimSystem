@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<ClaimSystem.Models.Claim>
 @{
-    ViewBag.Title = "Programme Manager Dashboard";
+    ViewBag.Title = "Manager Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Programme Manager Dashboard</h2>
+<h2>Manager - All Claims</h2>
 
-<div class="card gradient-card">
-    <h3>All Claims</h3>
+<div class="card">
+    <h3>Claims</h3>
     <table>
         <thead>
             <tr>
@@ -20,6 +20,7 @@
                 <th>Total</th>
                 <th>Status</th>
                 <th>Document</th>
+                <th>Rejection Reason</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -31,36 +32,44 @@
                     <td>@claim.LecturerName</td>
                     <td>@claim.Module</td>
                     <td>@claim.DateSubmitted.ToShortDateString()</td>
-                    <td>@claim.HourlyRate</td>
+                    <td>@String.Format("{0:C}", claim.HourlyRate)</td>
                     <td>@claim.HoursWorked</td>
-                    <td>@claim.TotalAmount</td>
+                    <td>@String.Format("{0:C}", claim.TotalAmount)</td>
                     <td><span class="status @claim.Status.ToLower().Replace(" ", "-")">@claim.Status</span></td>
-                    <td>@claim.DocumentPath</td>
                     <td>
-                        @if (claim.Status == "Coordinator Approved")
+                        @if (!string.IsNullOrEmpty(claim.DocumentPath))
                         {
-                            using (Html.BeginForm("Accept", "Manager", FormMethod.Post))
-                            {
-                                @Html.Hidden("id", claim.Id)
-                                <button type="submit">Accept</button>
-                            }
-                            using (Html.BeginForm("Reject", "Manager", FormMethod.Post))
-                            {
-                                @Html.Hidden("id", claim.Id)
-                                <button type="submit" style="background:red;">Reject</button>
-                            }
-                        }
-                        else if (claim.Status == "Coordinator Disapproved")
-                        {
-                            using (Html.BeginForm("Reject", "Manager", FormMethod.Post))
-                            {
-                                @Html.Hidden("id", claim.Id)
-                                <button type="submit" style="background:red;">Reject</button>
-                            }
+                            <a href="@claim.DocumentPath" target="_blank">View</a>
                         }
                         else
                         {
-                            <em>Finalised</em>
+
+                            <em>No document</em>
+                        }
+                    </td>
+                    <td>@(string.IsNullOrEmpty(claim.RejectionReason) ? "-" : claim.RejectionReason)</td>
+                    <td>
+                        @if (claim.Status == "Coordinator Approved")
+                        {
+                            <form asp-action="Accept" asp-controller="Manager" method="post" style="display:inline;">
+                                <input type="hidden" name="id" value="@claim.Id" />
+                                <button type="submit">Accept</button>
+                            </form>
+                            <form asp-action="Reject" asp-controller="Manager" method="post" style="display:inline;margin-left:8px;">
+                                <input type="hidden" name="id" value="@claim.Id" />
+                                <button type="submit" class="danger" style="background:red;">Reject</button>
+                            </form>
+                        }
+                        else if (claim.Status == "Coordinator Disapproved")
+                        {
+                            <form asp-action="Reject" asp-controller="Manager" method="post" style="display:inline;">
+                                <input type="hidden" name="id" value="@claim.Id" />
+                                <button type="submit" class="danger" style="background:red;">Reject</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <em>Finalized</em>
                         }
                     </td>
                 </tr>
@@ -69,7 +78,7 @@
     </table>
 </div>
 
-<div class="card gradient-card">
-    <h3>Total Value of Accepted Claims</h3>
-    <p><strong>@ViewBag.TotalAccepted</strong></p>
+<div class="card" style="margin-top:16px;">
+    <h3>Total Accepted Value</h3>
+    <p><strong>@String.Format("{0:C}", ViewBag.TotalAccepted ?? 0M)</strong></p>
 </div>

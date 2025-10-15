@@ -1,182 +1,211 @@
-﻿/* ===== Base Page ===== */
-body {
-    font-family: Arial, sans-serif;
+﻿/* site.css - clean dashboard style with named colors */
+
+* {
+    box-sizing: border-box;
     margin: 0;
-    background: white;
-    color: black;
+    padding: 0;
 }
 
-h1, h2, h3 {
-    margin-top: 10px;
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: whitesmoke;
+    color: #222;
+    line-height: 1.5;
 }
 
-/* ===== Navbar ===== */
+/* Navbar */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: gray;
+    background: linear-gradient(to right, midnightblue, teal);
     color: white;
-    padding: 30px;
-    font-size: large;
-    border-bottom: 2px solid #444;
+    padding: 14px 24px;
+    box-shadow: 0 3px 8px gray;
 }
 
     .navbar .logo h1 {
-        margin: 0;
         font-size: 20px;
     }
 
     .navbar nav a {
-        color: #fff;
+        color: white;
+        margin-left: 16px;
         text-decoration: none;
-        margin-left: 20px;
-        font-weight: 500;
     }
 
-        .navbar nav a:hover {
-            text-decoration: underline;
-        }
+.role-badge {
+    background: white;
+    color: black;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-left: 12px;
+}
 
-/* ===== Container ===== */
+/* Container */
 .container {
     padding: 20px;
     min-height: 80vh;
 }
 
-/* ===== Footer ===== */
-footer {
+/* Home roles */
+.home {
     text-align: center;
-    padding: 15px;
-    background: #f5f5f5;
-    border-top: 1px solid #ddd;
-    margin-top: 20px;
+    padding: 48px 20px;
 }
 
-/* ===== Gradient Card (like screenshot) ===== */
-.gradient-card,
+.role-cards {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+    .role-cards .card {
+        width: 220px;
+        padding: 30px 16px;
+        border-radius: 12px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        box-shadow: 0 6px 12px gray;
+    }
+
+.card.lecturer {
+    background: linear-gradient(135deg, royalblue, navy);
+}
+
+.card.coordinator {
+    background: linear-gradient(135deg, seagreen, darkgreen);
+}
+
+.card.manager {
+    background: linear-gradient(135deg, gold, goldenrod);
+    color: black;
+}
+
+/* Generic card */
 .card {
-    background: linear-gradient(to bottom, #666, #f9f9f9);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    color: #000;
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px lightgray;
+    margin-bottom: 16px;
 }
 
-/* ===== Stacked Form ===== */
-.form-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
+/* Forms */
 .form-group {
-    display: flex;
-    flex-direction: column;
+    margin-bottom: 12px;
+    text-align: left;
 }
 
-    .form-group label {
-        font-weight: bold;
-        margin-top: 10px
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+input[type="text"], input[type="password"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid lightgray;
+    font-size: 14px;
+}
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: royalblue;
     }
 
-    .form-group input {
-        width: 100%;
-        max-width: 450px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        font-size: 15px;
-    }
-
-/* ===== Full-Width Button ===== */
-button,
-.full-btn {
-    width: 50%;
-    padding: 14px;
-    background: black;
+/* Buttons */
+button, input[type="submit"] {
+    background: royalblue;
     color: white;
+    padding: 10px 16px;
     border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    transition: background 0.2s;
-    margin-top: 10px
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
 }
 
-    button:hover,
-    .full-btn:hover {
-        background: gray;
+    button:hover {
+        background: navy;
+        transform: translateY(-1px);
     }
 
-/* ===== Claim History Table ===== */
+    button.danger {
+        background: red;
+    }
+
+    button.warning {
+        background: orange;
+        color: black;
+    }
+
+/* Tables */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
-    background: white;
     border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 3px 8px lightgray;
 }
 
-    table th, table td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
+th, td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid lightgray;
+}
+
+th {
+    background: ghostwhite;
+    font-weight: 700;
+}
+
+tr:nth-child(even) {
+    background: whitesmoke;
+}
+
+tr:hover {
+    background: lightblue;
+}
+
+/* Status badges */
+.status {
+    padding: 6px 10px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    display: inline-block;
+}
+
+    .status.pending {
+        background: orange;
+        color: black;
     }
 
-    table th {
-        background: #f2f2f2;
+    .status.coordinator-approved {
+        background: deepskyblue;
     }
 
-/* ===== Claim Status Labels ===== */
-.status.pending {
-    color: orange;
-    font-weight: bold;
-}
-
-.status.approved {
-    color: green;
-    font-weight: bold;
-}
-
-.status.rejected {
-    color: red;
-    font-weight: bold;
-}
-
-/* ===== Home Page ===== */
-.home {
-    text-align: center;
-    padding: 40px;
-}
-
-    .home h1 {
-        margin-bottom: 10px;
+    .status.coordinator-disapproved {
+        background: gray;
     }
 
-    .home p {
-        font-size: 16px;
-        color: #555;
+    .status.accepted {
+        background: green;
     }
 
-/* ===== Role Cards ===== */
-.role-cards {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 30px;
-    flex-wrap: wrap;
+    .status.rejected {
+        background: crimson;
+    }
+
+/* small helpers */
+.full-btn {
+    width: 100%;
+    margin-top: 8px;
 }
-
-    .role-cards .card {
-        width: 250px;
-        font-weight: bold;
-        background: linear-gradient(gray, white);
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-        .role-cards .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-        }
