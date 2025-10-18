@@ -1,0 +1,65 @@
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="banner">
+    <strong>It happens!</strong> 🌱 Growth comes from learning and trying again!
+</div>
+
+<div class="card-ghost mb-3">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h5>Your Progress</h5>
+            <div class="mt-2">Overall Completion
+                <div class="progress-track"><i style="width:0%"></i></div>
+            </div>
+            <div class="mt-3">This Week
+                <div class="progress-track"><i style="width:0%"></i></div>
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary">Share Progress</button>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 summary-cards mb-3">
+    <div class="col-md-3"><div class="card p-3"><div>Due Today</div><h3>0</h3></div></div>
+    <div class="col-md-3"><div class="card p-3"><div>This Week</div><h3>1</h3></div></div>
+    <div class="col-md-3"><div class="card p-3"><div>Overdue</div><h3 class="text-danger">1</h3></div></div>
+    <div class="col-md-3"><div class="card p-3"><div>Completed</div><h3 class="text-success">0</h3></div></div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-7">
+        <div class="overdue">
+            <h5 class="text-danger">Overdue Assignments</h5>
+            <div class="assignment-card mt-3">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="card-label">Shakespeare Essay</div>
+                        <div class="text-muted small">English Literature</div>
+                        <div class="text-danger small mt-1">Today</div>
+                    </div>
+                    <div>
+                        <span class="badge bg-danger">high</span>
+                        <div class="badge-pill border">assignment</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="upcoming">
+            <h5>Upcoming This Week</h5>
+            <div class="assignment-card mt-3">
+                <div class="card-label text-primary">Algebra Problem Set</div>
+                <div class="text-muted small">Mathematics</div>
+                <div class="small">Due: Oct 19, 08:20 PM — In 4 days</div>
+                <div class="mt-2"><span class="badge bg-secondary">medium</span> <span class="badge-pill border">assignment</span></div>
+            </div>
+        </div>
+    </div>
+</div>

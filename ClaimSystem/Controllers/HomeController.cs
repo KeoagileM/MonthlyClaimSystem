@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using ClaimSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +10,6 @@ namespace ClaimSystem.Controllers
             return View();
         }
 
-        // GET: /Home/Login?role=Lecturer (role param optional)
         public IActionResult Login(string role)
         {
             ViewBag.Role = role;
@@ -21,12 +19,12 @@ namespace ClaimSystem.Controllers
         [HttpPost]
         public IActionResult Login(string username, string password, string role)
         {
-            if (!string.IsNullOrEmpty(username) && Users.Accounts.TryGetValue(username, out var acc))
+            if (!string.IsNullOrEmpty(username) && Users.Accounts.TryGetValue(username, out var user))
             {
-                if (acc.Password == password && acc.Role == role)
+                if (user.Password == password && user.Role == role)
                 {
-                    HttpContext.Session.SetString("Role", role);
-                    HttpContext.Session.SetString("Username", username);
+                    HttpContext.Session.SetString("Role", user.Role);
+                    HttpContext.Session.SetString("Username", user.Username);
 
                     return role switch
                     {
@@ -47,6 +45,11 @@ namespace ClaimSystem.Controllers
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Index");
+        }
+
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

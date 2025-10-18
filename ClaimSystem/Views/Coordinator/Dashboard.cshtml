@@ -1,82 +1,151 @@
 ﻿@model IEnumerable<ClaimSystem.Models.Claim>
 @{
-    ViewBag.Title = "Programme Coordinator Dashboard";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    <link rel="stylesheet" href="~/css/site.css">
+    ViewData["Title"] = "Coordinator Dashboard";
 }
 
-<h2>Programme Coordinator Dashboard</h2>
-
-<div class="card gradient-card">
-    <h3>Claims Review</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Employee No.</th>
-                <th>Lecturer Name</th>
-                <th>Module</th>
-                <th>Date</th>
-                <th>Rate</th>
-                <th>Hours</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Document</th>
-                <th>Rejection Reason</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var claim in Model)
-            {
-                <tr>
-                    <td>@claim.EmployeeNumber</td>
-                    <td>@claim.LecturerName</td>
-                    <td>@claim.Module</td>
-                    <td>@claim.DateSubmitted.ToShortDateString()</td>
-                    <td>@claim.HourlyRate</td>
-                    <td>@claim.HoursWorked</td>
-                    <td>@claim.TotalAmount</td>
-                    <td>
-                        <span class="status @claim.Status.ToLower().Replace(" ", "-")">@claim.Status</span>
-                    </td>
-                    <td>
-                        @if (!string.IsNullOrEmpty(claim.DocumentPath))
-                        {
-                            <a href="@claim.DocumentPath" target="_blank">View Document</a>
-                        }
-                        else
-                        {
-                            <em>No document</em>
-                        }
-                    </td>
-                    <td>
-                        @if (!string.IsNullOrEmpty(claim.RejectionReason))
-                        {
-                            <em>@claim.RejectionReason</em>
-                        }
-                    </td>
-                    <td>
-                        @if (claim.Status == "Pending")
-                        {
-                            using (Html.BeginForm("Approve", "Coordinator", FormMethod.Post))
-                            {
-                                @Html.Hidden("id", claim.Id)
-                                <button type="submit">Approve</button>
-                            }
-
-                            <form asp-action="Disapprove" asp-controller="Coordinator" method="post" style="margin-top:8px;">
-                                <input type="hidden" name="id" value="@claim.Id" />
-                                <textarea name="rejectionReason" placeholder="Reason..." rows="2" style="width:150px;"></textarea><br />
-                                <button type="submit" class="warning">Disapprove</button>
-                            </form>
-                        }
-                        else
-                        {
-                            <em>Reviewed</em>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<div class="dashboard-header">
+    <h1>✅ Coordinator Dashboard</h1>
+    <p>Welcome, @Context.Session.GetString("Username")!</p>
 </div>
+
+<div class="stats-container">
+    <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-info">
+            <h3>@ViewBag.PendingCount</h3>
+            <p>Pending Claims</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+            <h3>@ViewBag.ApprovedCount</h3>
+            <p>Approved by You</p>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>📋 Claims Requiring Review</h3>
+
+    @if (Model.Any(c => c.Status == "Pending"))
+    {
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Employee No.</th>
+                        <th>Lecturer Name</th>
+                        <th>Module</th>
+                        <th>Date</th>
+                        <th>Rate</th>
+                        <th>Hours</th>
+                        <th>Total</th>
+                        <th>Document</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in Model.Where(c => c.Status == "Pending").OrderBy(c => c.DateSubmitted))
+                    {
+                        <tr>
+                            <td>@claim.Id</td>
+                            <td>@claim.EmployeeNumber</td>
+                            <td>@claim.LecturerName</td>
+                            <td>@claim.Module</td>
+                            <td>@claim.DateSubmitted.ToString("MMM dd, yyyy")</td>
+                            <td>$@claim.HourlyRate.ToString("F2")</td>
+                            <td>@claim.HoursWorked</td>
+                            <td><strong>$@claim.TotalAmount.ToString("F2")</strong></td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(claim.DocumentPath))
+                                {
+                                    <a href="@claim.DocumentPath" target="_blank" class="btn-sm">📎 View</a>
+                                }
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <form asp-action="Approve" asp-controller="Coordinator" method="post" class="inline-form">
+                                        <input type="hidden" name="id" value="@claim.Id" />
+                                        <button type="submit" class="btn-success btn-sm">✅ Approve</button>
+                                    </form>
+
+                                    <form asp-action="Disapprove" asp-controller="Coordinator" method="post" class="inline-form">
+                                        <input type="hidden" name="id" value="@claim.Id" />
+                                        <div class="disapprove-form">
+                                            <textarea name="rejectionReason" placeholder="Reason for disapproval..."
+                                              rows="3" required class="reason-textarea"></textarea>
+                                            <button type="submit" class="btn-danger btn-sm">❌ Disapprove</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🎉</div>
+            <h4>No Pending Claims</h4>
+            <p>All claims have been reviewed. Great work!</p>
+        </div>
+    }
+</div>
+
+@if (Model.Any(c => c.Status != "Pending"))
+{
+    <div class="card">
+        <h3>📊 Review History</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Employee No.</th>
+                        <th>Lecturer</th>
+                        <th>Module</th>
+                        <th>Date</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in Model.Where(c => c.Status != "Pending").OrderByDescending(c => c.DateSubmitted))
+                    {
+                        <tr>
+                            <td>@claim.Id</td>
+                            <td>@claim.EmployeeNumber</td>
+                            <td>@claim.LecturerName</td>
+                            <td>@claim.Module</td>
+                            <td>@claim.DateSubmitted.ToString("MMM dd, yyyy")</td>
+                            <td>$@claim.TotalAmount.ToString("F2")</td>
+                            <td>
+                                <span class="status-badge status-@claim.Status.ToLower().Replace(" ", "-")">
+                                    @claim.Status
+                                </span>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(claim.RejectionReason))
+                                {
+                                    <div class="feedback-full">
+                                        @claim.RejectionReason
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

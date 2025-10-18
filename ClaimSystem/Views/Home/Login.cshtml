@@ -1,29 +1,58 @@
 ﻿@{
-    ViewBag.Title = "Login";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Login";
     var role = ViewBag.Role as string ?? "";
-    <link rel="stylesheet" href="~/css/site.css">
 }
 
-<div class="card">
-    <h3>Login as @role</h3>
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="role-icon">
+                @if (role == "Lecturer")
+                {
+                    <span>👨‍🏫</span>
+                }
+                else if (role == "Coordinator")
+                {
 
-    @if (ViewBag.Error != null)
-    {
-        <p style="color:red">@ViewBag.Error</p>
-    }
+                    <span>✅</span>
+                }
+                else if (role == "Manager")
+                {
 
-    <form method="post" asp-action="Login" asp-controller="Home">
-        <input type="hidden" name="role" value="@role" />
-        <div class="form-group">
-            <label>Username</label>
-            <input type="text" name="username" required />
+                    <span>💼</span>
+                }
+            </div>
+            <h2>Login as @role</h2>
+            <p>Enter your credentials to access the system</p>
         </div>
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" name="password" required />
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-error">
+                @ViewBag.Error
+            </div>
+        }
+
+        <form method="post" asp-action="Login" asp-controller="Home">
+            <input type="hidden" name="role" value="@role" />
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required
+                       placeholder="Enter your username" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required
+                       placeholder="Enter your password" />
+            </div>
+
+            <button type="submit" class="login-btn">Sign In</button>
+        </form>
+
+        <div class="login-footer">
+            <a href="/" class="back-link">← Back to Home</a>
         </div>
-        <button type="submit">Login</button>
-    </form>
+    </div>
 </div>
-

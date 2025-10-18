@@ -1,67 +1,96 @@
 ﻿using ClaimSystem.Models;
+using ClaimSystem.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClaimSystem.Controllers
 {
     public class LectureController : Controller
     {
-        // Shared in-memory store (replace with DB in real app)
-        public static List<Claim> Claims { get; } = new List<Claim>();
+        private readonly ClaimService _claimService;
+
+        public LectureController(ClaimService claimService)
+        {
+            _claimService = claimService;
+        }
 
         public IActionResult Dashboard()
         {
-            var role = HttpContext.Session.GetString("Role");
-            if (role != "Lecturer") return RedirectToAction("Index", "Home");
+            if (HttpContext.Session.GetString("Role") != "Lecturer")
+                return RedirectToAction("AccessDenied", "Home");
 
-            // pass all claims (in production filter to logged-in lecturer)
-            return View(Claims);
+            var username = HttpContext.Session.GetString("Username");
+            var userClaims = _claimService.GetClaimsByUser(username);
+            return View(userClaims);
         }
 
         [HttpPost]
-        public IActionResult SubmitClaim(
-            string EmployeeNumber,
-            string LecturerName,
-            string Module,
-            DateTime DateSubmitted,
-            decimal HourlyRate,
-            int HoursWorked,
-            IFormFile Document)
+        public async Task<IActionResult> SubmitClaim(
+            string employeeNumber,
+            string lecturerName,
+            string module,
+            DateTime dateSubmitted,
+            decimal hourlyRate,
+            int hoursWorked,
+            IFormFile document)
         {
-            var role = HttpContext.Session.GetString("Role");
-            if (role != "Lecturer") return RedirectToAction("Index", "Home");
+            if (HttpContext.Session.GetString("Role") != "Lecturer")
+                return RedirectToAction("AccessDenied", "Home");
+
+            if (string.IsNullOrWhiteSpace(employeeNumber) || string.IsNullOrWhiteSpace(lecturerName))
+            {
+                TempData["ErrorMessage"] = "Employee number and lecturer name are required.";
+                return RedirectToAction("Dashboard");
+            }
+
+            if (hourlyRate <= 0 || hoursWorked <= 0)
+            {
+                TempData["ErrorMessage"] = "Hourly rate and hours worked must be greater than zero.";
+                return RedirectToAction("Dashboard");
+            }
 
             string filePath = null;
-            if (Document != null && Document.Length > 0)
+            if (document != null && document.Length > 0)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Documents");
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+                if (document.Length > 10 * 1024 * 1024)
+                {
+                    TempData["ErrorMessage"] = "File size must be less than 10MB.";
+                    return RedirectToAction("Dashboard");
+                }
 
-                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(Document.FileName)}";
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "documents");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(document.FileName)}";
                 var fullPath = Path.Combine(uploadsFolder, uniqueFileName);
-                using var stream = new FileStream(fullPath, FileMode.Create);
-                Document.CopyTo(stream);
 
-                filePath = $"/Documents/{uniqueFileName}"; // relative to web root
+                using var stream = new FileStream(fullPath, FileMode.Create);
+                await document.CopyToAsync(stream);
+
+                filePath = $"/documents/{uniqueFileName}";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Please upload a supporting document.";
+                return RedirectToAction("Dashboard");
             }
 
             var claim = new Claim
             {
-                Id = Claims.Count + 1,
-                EmployeeNumber = EmployeeNumber,
-                LecturerName = LecturerName,
-                Module = Module,
-                DateSubmitted = DateSubmitted == default ? DateTime.Now : DateSubmitted,
-                HourlyRate = HourlyRate,
-                HoursWorked = HoursWorked,
-                TotalAmount = HourlyRate * HoursWorked,
+                EmployeeNumber = employeeNumber,
+                LecturerName = lecturerName,
+                Module = module,
+                DateSubmitted = dateSubmitted == default ? DateTime.Today : dateSubmitted,
+                HourlyRate = hourlyRate,
+                HoursWorked = hoursWorked,
                 DocumentPath = filePath,
-                Status = "Pending",
-                RejectionReason = null
+                SubmittedBy = HttpContext.Session.GetString("Username")
             };
 
-            Claims.Add(claim);
+            _claimService.AddClaim(claim);
+
+            TempData["SuccessMessage"] = "Claim submitted successfully! Waiting for coordinator approval.";
             return RedirectToAction("Dashboard");
         }
     }
-
 }

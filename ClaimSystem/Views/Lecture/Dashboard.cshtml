@@ -1,114 +1,144 @@
 ﻿@model IEnumerable<ClaimSystem.Models.Claim>
 @{
-    ViewBag.Title = "Lecturer Dashboard";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    <link rel="stylesheet" href="~/css/site.css">
+    ViewData["Title"] = "Lecturer Dashboard";
 }
 
-<h2>Lecturer Dashboard</h2>
-
-<div class="card">
-    <h3>Submit a New Claim</h3>
-    <form asp-action="SubmitClaim" asp-controller="Lecture" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <label>Employee Number</label>
-            <input type="text" name="EmployeeNumber" required />
-        </div>
-        <div class="form-group">
-            <label>Lecturer Name</label>
-            <input type="text" name="LecturerName" required />
-        </div>
-        <div class="form-group">
-            <label>Module</label>
-            <select name="Module" required>
-                <option value="">-- Select Module --</option>
-                <option>Programming Fundamentals</option>
-                <option>Web Development</option>
-                <option>Database Systems</option>
-                <option>Software Engineering</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Date</label>
-            <input type="date" name="DateSubmitted" />
-        </div>
-        <div class="form-group">
-            <label>Hourly Rate</label>
-            <input type="number" name="HourlyRate" step="0.01" required />
-        </div>
-        <div class="form-group">
-            <label>Hours Worked</label>
-            <input type="number" name="HoursWorked" required />
-        </div>
-        <div class="form-group">
-            <label>Upload Document</label>
-            <input type="file" name="Document" accept=".pdf,.doc,.docx,.jpg,.png" required />
-        </div>
-        <button type="submit" class="full-btn">Submit Claim</button>
-    </form>
+<div class="dashboard-header">
+    <h1>📋 Lecturer Dashboard</h1>
+    <p>Welcome! Please submit your claim below.</p>
 </div>
 
-<div class="card">
-    <h3>My Claims</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Employee No.</th>
-                <th>Lecturer Name</th>
-                <th>Module</th>
-                <th>Date</th>
-                <th>Rate</th>
-                <th>Hours</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Document</th>
-                <th>Feedback</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model != null && Model.Any())
-            {
-                foreach (var claim in Model)
-                {
-                    <tr>
-                        <td>@claim.EmployeeNumber</td>
-                        <td>@claim.LecturerName</td>
-                        <td>@claim.Module</td>
-                        <td>@claim.DateSubmitted.ToShortDateString()</td>
-                        <td>@String.Format("{0:C}", claim.HourlyRate)</td>
-                        <td>@claim.HoursWorked</td>
-                        <td>@String.Format("{0:C}", claim.TotalAmount)</td>
-                        <td><span class="status @claim.Status.ToLower().Replace(" ", "-")">@claim.Status</span></td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(claim.DocumentPath))
-                            {
-                                <a href="@claim.DocumentPath" target="_blank">View</a>
-                            }
-                            else
-                            {
+<div class="grid-2col">
+    <div class="card">
+        <h3>📝 Submit New Claim</h3>
+        <form asp-action="SubmitClaim" asp-controller="Lecture" method="post" enctype="multipart/form-data" class="claim-form">
+            <div class="form-group">
+                <label>Employee Number *</label>
+                <input type="text" name="employeeNumber" required
+                       placeholder="Enter your employee number" />
+            </div>
 
-                                <em>No document</em>
-                            }
-                        </td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(claim.RejectionReason))
-                            {
-                                <strong>@claim.RejectionReason</strong>
-                            }
-                            else
-                            {
+            <div class="form-group">
+                <label>Lecturer Name *</label>
+                <input type="text" name="lecturerName" required
+                       placeholder="Enter your full name" />
+            </div>
 
-                                <em>—</em>
-                            }
-                        </td>
-                    </tr>
-                }
-            }
-            else
-            {
-                <tr><td colspan="10">No claims yet</td></tr>
-            }
-        </tbody>
-    </table>
+            <div class="form-group">
+                <label>Module *</label>
+                <select name="module" required>
+                    <option value="">-- Select Module --</option>
+                    <option value="Programming 1A">Programming 1A</option>
+                    <option value="Programming 1B">Programming 1B</option>
+                    <option value="Programming 2A">Programming 2B</option>
+                    <option value="Programming 2B">Programming 2B</option>
+                    <option value="Web Development(Introduction)">Web Development(Introduction)</option>
+                    <option value="Web Development(Intermediate)">Web Development(Intermediate)</option>
+                    <option value="Web Development(Advanced)">Web Development(Advanced)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Date of Work *</label>
+                <input type="date" name="dateSubmitted" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Hourly Rate ($) *</label>
+                    <input type="number" name="hourlyRate" step="0.01" min="0" required
+                           placeholder="0.00" />
+                </div>
+
+                <div class="form-group">
+                    <label>Hours Worked *</label>
+                    <input type="number" name="hoursWorked" min="1" max="200" required
+                           placeholder="0" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Upload Supporting Document *</label>
+                <input type="file" name="document" accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" required />
+                <small>Accepted formats: PDF, Word, JPG, PNG (Max: 10MB)</small>
+            </div>
+
+            <button type="submit" class="btn-primary full-width">Submit Claim</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3>📊 My Claim History</h3>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Employee No.</th>
+                            <th>Lecturer Name</th>
+                            <th>Module</th>
+                            <th>Date</th>
+                            <th>Hours</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Document</th>
+                            <th>Feedback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var claim in Model.OrderByDescending(c => c.DateSubmitted))
+                        {
+                            <tr>
+                                <td>@claim.Id</td>
+                                <td>@claim.EmployeeNumber</td>
+                                <td>@claim.LecturerName</td>
+                                <td>@claim.Module</td>
+                                <td>@claim.DateSubmitted.ToString("MMM dd, yyyy")</td>
+                                <td>@claim.HoursWorked</td>
+                                <td>$@claim.TotalAmount.ToString("F2")</td>
+                                <td>
+                                    <span class="status-badge status-@claim.Status.ToLower().Replace(" ", "-")">
+                                        @claim.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(claim.DocumentPath))
+                                    {
+                                        <a href="@claim.DocumentPath" target="_blank" class="doc-link">📎 View</a>
+                                    }
+                                    else
+                                    {
+                                        <em class="text-muted">No document</em>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(claim.RejectionReason))
+                                    {
+                                        <div class="feedback-full">
+                                            <strong>Reason:</strong> @claim.RejectionReason
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h4>No Claims Submitted</h4>
+                <p>You haven't submitted any claims yet. Use the form to submit your first claim.</p>
+            </div>
+        }
+    </div>
 </div>
-

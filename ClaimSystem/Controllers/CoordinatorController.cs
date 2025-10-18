@@ -1,31 +1,43 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ClaimSystem.Models;
+﻿using ClaimSystem.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ClaimSystem.Controllers
 {
     public class CoordinatorController : Controller
     {
+        private readonly ClaimService _claimService;
+
+        public CoordinatorController(ClaimService claimService)
+        {
+            _claimService = claimService;
+        }
+
         public IActionResult Dashboard()
         {
             if (HttpContext.Session.GetString("Role") != "Coordinator")
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("AccessDenied", "Home");
 
-            // show all claims (or filter as needed)
-            return View(LectureController.Claims);
+            ViewBag.PendingCount = _claimService.GetPendingClaimsCount();
+            ViewBag.ApprovedCount = _claimService.GetCoordinatorApprovedCount();
+
+            return View(_claimService.GetAllClaims());
         }
 
         [HttpPost]
         public IActionResult Approve(int id)
         {
             if (HttpContext.Session.GetString("Role") != "Coordinator")
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("AccessDenied", "Home");
 
-            var claim = LectureController.Claims.FirstOrDefault(c => c.Id == id);
-            if (claim != null && claim.Status == "Pending")
+            if (_claimService.UpdateClaimStatus(id, "Coordinator Approved"))
             {
-                claim.Status = "Coordinator Approved";
-                claim.RejectionReason = null;
+                TempData["SuccessMessage"] = "Claim approved successfully! Sent to manager for final approval.";
             }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to approve claim.";
+            }
+
             return RedirectToAction("Dashboard");
         }
 
@@ -33,14 +45,23 @@ namespace ClaimSystem.Controllers
         public IActionResult Disapprove(int id, string rejectionReason)
         {
             if (HttpContext.Session.GetString("Role") != "Coordinator")
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("AccessDenied", "Home");
 
-            var claim = LectureController.Claims.FirstOrDefault(c => c.Id == id);
-            if (claim != null && claim.Status == "Pending")
+            if (string.IsNullOrWhiteSpace(rejectionReason))
             {
-                claim.Status = "Coordinator Disapproved";
-                claim.RejectionReason = rejectionReason;
+                TempData["ErrorMessage"] = "Please provide a reason for disapproval.";
+                return RedirectToAction("Dashboard");
             }
+
+            if (_claimService.UpdateClaimStatus(id, "Coordinator Disapproved", rejectionReason))
+            {
+                TempData["SuccessMessage"] = "Claim disapproved successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to disapprove claim.";
+            }
+
             return RedirectToAction("Dashboard");
         }
     }

@@ -7,30 +7,44 @@
 }
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>@ViewBag.Title - CMCS</title>
-    <link rel="stylesheet" href="~/Content/site.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Claim Management System</title>
+    <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
     <header>
         <div class="navbar">
             <div class="logo">
-                <h1>CMCS</h1>
+                <h1>📋 CMCS</h1>
             </div>
             <nav>
                 <a asp-controller="Home" asp-action="Index">Home</a>
                 @if (!string.IsNullOrEmpty(role))
                 {
-                    <span class="role-badge">Logged in as @role (@username)</span>
-                    <a asp-controller="Home" asp-action="Logout" style="margin-left:12px;">Logout</a>
+                    <span class="role-badge">@username (@role)</span>
+                    <a asp-controller="Home" asp-action="Logout" class="logout-btn">Logout</a>
                 }
             </nav>
         </div>
     </header>
 
     <main class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-error">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
         @RenderBody()
     </main>
 

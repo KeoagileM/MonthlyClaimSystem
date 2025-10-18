@@ -1,26 +1,36 @@
 ﻿@{
-    ViewBag.Title = "Home";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    <link rel="stylesheet" href="~/css/site.css">
-
+    ViewData["Title"] = "Home";
 }
 
 <div class="home">
-    <h2>Welcome to the Claim Management System</h2>
-    <p>Select your role:</p>
+    <div class="hero-section">
+        <h1>Welcome to the Claim Management System</h1>
+        <p>Streamline your academic payment claims with our secure platform</p>
+    </div>
 
-    <div class="role-cards">
-        <a href="/Home/Login?role=Lecturer" class="card lecturer">
-            <h2>Lecturer</h2>
-            <p>Submit and track your monthly claims.</p>
-        </a>
-        <a href="/Home/Login?role=Coordinator" class="card coordinator">
-            <h2>Programme Coordinator</h2>
-            <p>Review, approve or reject lecturer claims.</p>
-        </a>
-        <a href="/Home/Login?role=Manager" class="card manager">
-            <h2>Programme Manager</h2>
-            <p>Approve and reject the lecture claims that were reviewed by the PM</p>
-        </a>
+    <div class="role-section">
+        <h2>Select Your Role to Continue</h2>
+        <div class="role-cards">
+            <a href="/Home/Login?role=Lecturer" class="card lecturer">
+                <div class="card-icon">👨‍🏫</div>
+                <h2>Lecturer</h2>
+                <p>Submit and track your monthly claims</p>
+                <div class="card-arrow">→</div>
+            </a>
+
+            <a href="/Home/Login?role=Coordinator" class="card coordinator">
+                <div class="card-icon">✅</div>
+                <h2>Programme Coordinator</h2>
+                <p>Review and verify lecturer claims</p>
+                <div class="card-arrow">→</div>
+            </a>
+
+            <a href="/Home/Login?role=Manager" class="card manager">
+                <div class="card-icon">💼</div>
+                <h2>Programme Manager</h2>
+                <p>Final approval and payment processing</p>
+                <div class="card-arrow">→</div>
+            </a>
+        </div>
     </div>
 </div>

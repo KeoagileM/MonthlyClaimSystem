@@ -9,10 +9,10 @@
         public DateTime DateSubmitted { get; set; }
         public decimal HourlyRate { get; set; }
         public int HoursWorked { get; set; }
-        public decimal TotalAmount { get; set; }
-        public string Status { get; set; }
-        public string DocumentPath { get; set; }      // relative path under wwwroot
-        public string RejectionReason { get; set; }   // from coordinator
+        public decimal TotalAmount => HourlyRate * HoursWorked;
+        public string Status { get; set; } = "Pending";
+        public string DocumentPath { get; set; }
+        public string RejectionReason { get; set; }
+        public string SubmittedBy { get; set; }
     }
-
 }
