@@ -1,16 +1,151 @@
 ﻿using System.Data.SqlClient;
 using ClaimSystem.Models;
+using System.Diagnostics;
+using System.ComponentModel;
 
 namespace ClaimSystem.Services
 {
     public class DatabaseServices
     {
         public string ConnectionString { get; }
+        private readonly string instanceName = "ClaimSystem";
 
         public DatabaseServices()
         {
-            ConnectionString = @"Server=(localdb)\ClaimSystem;Database=ClaimSystem;Trusted_Connection=true;TrustServerCertificate=true;";
+            ConnectionString = $@"Server=(localdb)\{instanceName};Database=ClaimSystem;Trusted_Connection=true;TrustServerCertificate=true;";
+
+            // Create LocalDB instance first, then initialize database
+            CreateClaimSystemInstance();
             InitializeDatabase();
+        }
+
+        // -----------------------------
+        // LocalDB Instance Handling
+        // -----------------------------
+        private void CreateClaimSystemInstance()
+        {
+            if (CheckInstanceExists())
+            {
+                Console.WriteLine($"LocalDB instance '{instanceName}' already exists.");
+                return;
+            }
+
+            try
+            {
+                var processStartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c sqllocaldb create \"{instanceName}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using (var process = new Process { StartInfo = processStartInfo })
+                {
+                    Console.WriteLine($"Creating LocalDB instance '{instanceName}'...");
+                    process.Start();
+                    string output = process.StandardOutput.ReadToEnd();
+                    string error = process.StandardError.ReadToEnd();
+                    process.WaitForExit();
+
+                    if (process.ExitCode == 0)
+                        Console.WriteLine($"LocalDB instance '{instanceName}' created successfully!");
+                    else
+                    {
+                        Console.WriteLine($"Error creating instance: {error}");
+                        throw new Exception($"Failed to create LocalDB instance: {error}");
+                    }
+                }
+
+                // Start the instance after creation
+                StartInstance();
+            }
+            catch (Win32Exception ex) when (ex.NativeErrorCode == 2)
+            {
+                throw new Exception("SQL Server LocalDB is not installed. Please install SQL Server Express LocalDB from Microsoft.");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to create LocalDB instance: {ex.Message}");
+            }
+        }
+
+        private void StartInstance()
+        {
+            try
+            {
+                var processStartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c sqllocaldb start \"{instanceName}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using (var process = new Process { StartInfo = processStartInfo })
+                {
+                    Console.WriteLine($"Starting LocalDB instance '{instanceName}'...");
+                    process.Start();
+                    string output = process.StandardOutput.ReadToEnd();
+                    string error = process.StandardError.ReadToEnd();
+                    process.WaitForExit();
+
+                    if (process.ExitCode == 0)
+                        Console.WriteLine($"LocalDB instance '{instanceName}' started successfully!");
+                    else if (!error.Contains("is already running", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine($"Warning: Could not start instance: {error}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Could not start instance: {ex.Message}");
+            }
+        }
+
+        private bool CheckInstanceExists()
+        {
+            try
+            {
+                var processStartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c sqllocaldb info \"{instanceName}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using (var process = new Process { StartInfo = processStartInfo })
+                {
+                    process.Start();
+                    string output = process.StandardOutput.ReadToEnd();
+                    string error = process.StandardError.ReadToEnd();
+                    process.WaitForExit();
+
+                    // If there's an error containing "doesn't exist", instance doesn't exist
+                    if (!string.IsNullOrWhiteSpace(error) &&
+                        error.Contains($"LocalDB instance \"{instanceName}\" doesn't exist", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+
+                    // If we get output and no "doesn't exist" error, instance exists
+                    return !string.IsNullOrWhiteSpace(output)
+                        && !output.Contains("doesn't exist", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error checking instance existence: {ex.Message}");
+                return false;
+            }
         }
 
         private void InitializeDatabase()
@@ -32,19 +167,33 @@ namespace ClaimSystem.Services
 
         private void CreateDatabase()
         {
-            using (var connection = new SqlConnection(ConnectionString.Replace("Database=ClaimSystem;", "")))
+            // Use master database connection string for initial creation
+            var masterConnectionString = $@"Server=(localdb)\{instanceName};Database=master;Trusted_Connection=true;TrustServerCertificate=true;";
+
+            using (var connection = new SqlConnection(masterConnectionString))
             {
-                connection.Open();
-
-                string createDbSql = @"
-                    IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'ClaimSystem')
-                    BEGIN
-                        CREATE DATABASE ClaimSystem;
-                    END";
-
-                using (var command = new SqlCommand(createDbSql, connection))
+                try
                 {
-                    command.ExecuteNonQuery();
+                    connection.Open();
+
+                    string createDbSql = @"
+                        IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'ClaimSystem')
+                        BEGIN
+                            CREATE DATABASE ClaimSystem;
+                        END";
+
+                    using (var command = new SqlCommand(createDbSql, connection))
+                    {
+                        command.ExecuteNonQuery();
+                        Console.WriteLine("Database 'ClaimSystem' verified/created successfully!");
+                    }
+                }
+                catch (SqlException ex) when (ex.Number == 4060) // Database doesn't exist
+                {
+                    // This shouldn't happen due to our check, but handle it anyway
+                    Console.WriteLine("Database connection failed. Retrying...");
+                    Thread.Sleep(2000); // Wait 2 seconds
+                    CreateDatabase(); // Recursive retry
                 }
             }
         }
@@ -93,11 +242,13 @@ namespace ClaimSystem.Services
                 using (var command = new SqlCommand(createUsersTable, connection))
                 {
                     command.ExecuteNonQuery();
+                    Console.WriteLine("Users table verified/created successfully!");
                 }
 
                 using (var command = new SqlCommand(createClaimsTable, connection))
                 {
                     command.ExecuteNonQuery();
+                    Console.WriteLine("Claims table verified/created successfully!");
                 }
 
                 // Seed initial users if they don't exist
@@ -114,17 +265,18 @@ namespace ClaimSystem.Services
                 if (userCount == 0)
                 {
                     string insertUsersSql = @"
-                        INSERT INTO Users (Username, PasswordHash, Role) VALUES
-                        ('lecturer', @lecturerHash, 'Lecturer'),
-                        ('coordinator', @coordinatorHash, 'Coordinator'),
-                        ('manager', @managerHash, 'Manager')";
+                INSERT INTO Users (Username, PasswordHash, Role) VALUES
+                ('lecturer', @lecturerPassword, 'Lecturer'),
+                ('coordinator', @coordinatorPassword, 'Coordinator'),
+                ('manager', @managerPassword, 'Manager')";
 
                     using (var insertCommand = new SqlCommand(insertUsersSql, connection))
                     {
-                        insertCommand.Parameters.AddWithValue("@lecturerHash", BCrypt.Net.BCrypt.HashPassword("1234"));
-                        insertCommand.Parameters.AddWithValue("@coordinatorHash", BCrypt.Net.BCrypt.HashPassword("5678"));
-                        insertCommand.Parameters.AddWithValue("@managerHash", BCrypt.Net.BCrypt.HashPassword("9999"));
+                        insertCommand.Parameters.AddWithValue("@lecturerPassword", "1234");
+                        insertCommand.Parameters.AddWithValue("@coordinatorPassword", "5678");
+                        insertCommand.Parameters.AddWithValue("@managerPassword", "9999");
                         insertCommand.ExecuteNonQuery();
+                        Console.WriteLine("Default users seeded successfully!");
                     }
                 }
             }

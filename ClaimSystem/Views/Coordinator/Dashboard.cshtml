@@ -5,21 +5,21 @@
 
 <!--The header of the coordinator-->
 <div class="dashboard-header">
-    <h1>✅ Coordinator Dashboard</h1>
+    <h1>Coordinator Dashboard</h1>
     <p>Welcome, @Context.Session.GetString("Username")!</p>
 </div>
 
 <!--The class for all the pending claims-->
 <div class="stats-container">
     <div class="stat-card">
-        <div class="stat-icon">📋</div>
+        <div class="stat-icon"></div>
         <div class="stat-info">
             <h3>@ViewBag.PendingCount</h3>
             <p>Pending Claims</p>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon">✅</div>
+        <div class="stat-icon"></div>
         <div class="stat-info">
             <h3>@ViewBag.ApprovedCount</h3>
             <p>Approved by You</p>
@@ -29,7 +29,7 @@
 
 <!--The class to review the claims-->
 <div class="card">
-    <h3>📋 Claims Requiring Review</h3>
+    <h3>Claims Requiring Review</h3>
 
     @if (Model.Any(c => c.Status == "Pending"))
     {
@@ -66,7 +66,7 @@
                             <td>
                                 @if (!string.IsNullOrEmpty(claim.DocumentPath))
                                 {
-                                    <a href="@claim.DocumentPath" target="_blank" class="btn-sm">📎 View</a>
+                                    <a href="@claim.DocumentPath" target="_blank" class="btn-sm">View Document</a>
                                 }
                             </td>
                             <td>
@@ -97,7 +97,7 @@
     {
         <!--This happens when there is no icons-->
         <div class="empty-state">
-            <div class="empty-icon">🎉</div>
+            <div class="empty-icon"></div>
             <h4>No Pending Claims</h4>
             <p>All claims have been reviewed. Great work!</p>
         </div>
@@ -109,7 +109,7 @@
 {
     <!--The pending statuses will be on the review history-->
     <div class="card">
-        <h3>📊 Review History</h3>
+        <h3>Review History</h3>
         <div class="table-container">
             <table class="data-table">
                 <thead>

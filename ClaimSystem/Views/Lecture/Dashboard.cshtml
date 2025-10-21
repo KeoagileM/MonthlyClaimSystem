@@ -5,33 +5,33 @@
 
 <!--The header of the Lecture-->
 <div class="dashboard-header">
-    <h1>📋 Lecturer Dashboard</h1>
+    <h1>Lecturer Dashboard</h1>
     <p>Welcome! Please submit your claim below.</p>
 </div>
 
 <!--The class of the form that is going to be used for getting the claims-->
 <div class="grid-2col">
     <div class="card">
-        <h3>📝 Submit New Claim</h3>
+        <h3>Submit New Claim</h3>
         <form asp-action="SubmitClaim" asp-controller="Lecture" method="post" enctype="multipart/form-data" class="claim-form">
 
             <!--Getting the employee numbeer-->
             <div class="form-group">
-                <label>Employee Number *</label>
+                <label>Employee Number</label>
                 <input type="text" name="employeeNumber" required
                        placeholder="Enter your employee number" />
             </div>
 
             <!--Getting the Lecture name number-->
             <div class="form-group">
-                <label>Lecturer Name *</label>
+                <label>Lecturer Name</label>
                 <input type="text" name="lecturerName" required
                        placeholder="Enter your full name" />
             </div>
 
             <!--Getting the module the lecturer lectures-->
             <div class="form-group">
-                <label>Module *</label>
+                <label>Module</label>
                 <select name="module" required>
                     <option value="">-- Select Module --</option>
                     <option value="Programming 1A">Programming 1A</option>
@@ -84,7 +84,7 @@
 
     <!--The class for the claim history-->
     <div class="card">
-        <h3>📊 My Claim History</h3>
+        <h3>My Claim History</h3>
 
         @if (Model != null && Model.Any())
         {
@@ -126,7 +126,7 @@
                                 <td>
                                     @if (!string.IsNullOrEmpty(claim.DocumentPath))
                                     {
-                                        <a href="@claim.DocumentPath" target="_blank" class="doc-link">📎 View</a>
+                                        <a href="@claim.DocumentPath" target="_blank" class="doc-link">View Document</a>
                                     }
                                     else
                                     {
@@ -155,7 +155,7 @@
         {
             //When empty this will happen
             <div class="empty-state">
-                <div class="empty-icon">📭</div>
+                <div class="empty-icon"></div>
                 <h4>No Claims Submitted</h4>
                 <p>You haven't submitted any claims yet. Use the form to submit your first claim.</p>
             </div>

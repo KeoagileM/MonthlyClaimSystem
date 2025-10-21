@@ -8,7 +8,7 @@
 
 <!--The header for the manager-->
 <div class="dashboard-header">
-    <h1>💼 Manager Dashboard</h1>
+    <h1>Manager Dashboard</h1>
     <p>Welcome, @Context.Session.GetString("Username")!</p>
 </div>
 
@@ -16,7 +16,7 @@
 <div class="stats-container">
     <!--The total accepted value of the claims-->
     <div class="stat-card highlight">
-        <div class="stat-icon">💰</div>
+        <div class="stat-icon"></div>
         <div class="stat-info">
             <h3>$@totalAccepted.ToString("F2")</h3>
             <p>Total Accepted Value</p>
@@ -24,7 +24,7 @@
     </div>
     <!--The class for the pending reviews-->
     <div class="stat-card">
-        <div class="stat-icon">📋</div>
+        <div class="stat-icon"></div>
         <div class="stat-info">
             <h3>@pendingCount</h3>
             <p>Pending Review</p>
@@ -32,7 +32,7 @@
     </div>
     <!--The number of claims approved-->
     <div class="stat-card">
-        <div class="stat-icon">✅</div>
+        <div class="stat-icon"></div>
         <div class="stat-info">
             <h3>@approvedCount</h3>
             <p>Coordinator Approved</p>
@@ -42,7 +42,7 @@
 
 <!--The class that contains the claims that are approved by the coordinator-->
 <div class="card">
-    <h3>📋 Claims Awaiting Final Decision</h3>
+    <h3>Claims Awaiting Final Decision</h3>
 
     <!--The manager will only be able to approve only when coordinator is approved-->
     @if (Model.Any(c => c.Status == "Coordinator Approved"))
@@ -74,7 +74,7 @@
                             <td>
                                 @if (!string.IsNullOrEmpty(claim.DocumentPath))
                                 {
-                                    <a href="@claim.DocumentPath" target="_blank" class="btn-sm">📎 View</a>
+                                    <a href="@claim.DocumentPath" target="_blank" class="btn-sm">View Document</a>
                                 }
                             </td>
                             <td>
@@ -103,7 +103,7 @@
     {
         <!--This happens when there ae no claims-->
         <div class="empty-state">
-            <div class="empty-icon">⏳</div>
+            <div class="empty-icon"></div>
             <h4>No Claims Awaiting Decision</h4>
             <p>All coordinator-reviewed claims have been processed.</p>
         </div>
@@ -112,7 +112,7 @@
 
 <!--All the claims that are rejected or accepted-->
 <div class="card">
-    <h3>📊 All Claims Overview</h3>
+    <h3>All Claims Overview</h3>
     <div class="table-container">
         <table class="data-table">
             <thead>

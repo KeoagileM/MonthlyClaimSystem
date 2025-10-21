@@ -52,7 +52,8 @@ namespace ClaimSystem.Services
             var user = await GetUserByUsernameAsync(username);
             if (user != null)
             {
-                return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+                // Compare plain text passwords instead of using BCrypt
+                return password == user.PasswordHash;
             }
             return false;
         }
