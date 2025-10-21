@@ -1,11 +1,15 @@
 ﻿using ClaimSystem.Services;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllersWithViews();
+
+// Register services - note the name change to DatabaseServices
+builder.Services.AddSingleton<DatabaseServices>();
+builder.Services.AddScoped<ClaimService>();
+builder.Services.AddScoped<UserService>();
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSession(options =>
 {
@@ -13,9 +17,6 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-
-// Register ClaimService as singleton
-builder.Services.AddSingleton<ClaimService>();
 
 var app = builder.Build();
 
@@ -35,5 +36,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Database will auto-initialize when DatabaseServices is first used
+Console.WriteLine("Application started. Database will auto-initialize on first use.");
 
 app.Run();

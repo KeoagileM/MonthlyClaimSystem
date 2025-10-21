@@ -1,80 +1,308 @@
-﻿using ClaimSystem.Models;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Data.SqlClient;
+using ClaimSystem.Models;
 
 namespace ClaimSystem.Services
 {
     public class ClaimService
     {
-        private readonly List<Claim> _claims = new();
-        private int _nextId = 1;
+        private readonly DatabaseServices _dbServices;
 
-        public IEnumerable<Claim> GetAllClaims() => _claims.AsReadOnly();
-
-        public IEnumerable<Claim> GetClaimsByUser(string username)
+        public ClaimService(DatabaseServices dbServices)
         {
-            return _claims.Where(c => c.SubmittedBy == username);
+            _dbServices = dbServices;
         }
 
-        public IEnumerable<Claim> GetPendingClaims()
+        private SqlConnection GetConnection()
         {
-            return _claims.Where(c => c.Status == "Pending");
+            return new SqlConnection(_dbServices.ConnectionString);
         }
 
-        public IEnumerable<Claim> GetCoordinatorApprovedClaims()
+        public async Task<List<Claim>> GetAllClaimsAsync()
         {
-            return _claims.Where(c => c.Status == "Coordinator Approved");
-        }
-
-        public Claim GetClaimById(int id)
-        {
-            return _claims.FirstOrDefault(c => c.Id == id);
-        }
-
-        public void AddClaim(Claim claim)
-        {
-            claim.Id = _nextId++;
-            claim.Status = "Pending";
-            _claims.Add(claim);
-        }
-
-        public bool UpdateClaimStatus(int id, string status, string rejectionReason = null)
-        {
-            var claim = GetClaimById(id);
-            if (claim != null)
+            var claims = new List<Claim>();
+            using (var connection = GetConnection())
             {
-                claim.Status = status;
-                if (!string.IsNullOrEmpty(rejectionReason))
+                await connection.OpenAsync();
+                string sql = "SELECT * FROM Claims ORDER BY CreatedAt DESC";
+
+                using (var command = new SqlCommand(sql, connection))
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    claim.RejectionReason = rejectionReason;
+                    while (await reader.ReadAsync())
+                    {
+                        claims.Add(new Claim
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            EmployeeNumber = reader.GetString(reader.GetOrdinal("EmployeeNumber")),
+                            LecturerName = reader.GetString(reader.GetOrdinal("LecturerName")),
+                            Module = reader.GetString(reader.GetOrdinal("Module")),
+                            DateSubmitted = reader.GetDateTime(reader.GetOrdinal("DateSubmitted")),
+                            HourlyRate = reader.GetDecimal(reader.GetOrdinal("HourlyRate")),
+                            HoursWorked = reader.GetInt32(reader.GetOrdinal("HoursWorked")),
+                            TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+                            Status = reader.GetString(reader.GetOrdinal("Status")),
+                            DocumentPath = reader.IsDBNull(reader.GetOrdinal("DocumentPath")) ? null : reader.GetString(reader.GetOrdinal("DocumentPath")),
+                            RejectionReason = reader.IsDBNull(reader.GetOrdinal("RejectionReason")) ? null : reader.GetString(reader.GetOrdinal("RejectionReason")),
+                            SubmittedBy = reader.GetString(reader.GetOrdinal("SubmittedBy")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
+                        });
+                    }
                 }
-                else if (status == "Coordinator Approved" || status == "Accepted")
-                {
-                    claim.RejectionReason = null;
-                }
-                return true;
             }
-            return false;
+            return claims;
         }
 
-        public decimal GetTotalAcceptedAmount()
+        public async Task<List<Claim>> GetClaimsByUserAsync(string username)
         {
-            return _claims.Where(c => c.Status == "Accepted").Sum(c => c.TotalAmount);
+            var claims = new List<Claim>();
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = "SELECT * FROM Claims WHERE SubmittedBy = @Username ORDER BY CreatedAt DESC";
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@Username", username);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            claims.Add(new Claim
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                EmployeeNumber = reader.GetString(reader.GetOrdinal("EmployeeNumber")),
+                                LecturerName = reader.GetString(reader.GetOrdinal("LecturerName")),
+                                Module = reader.GetString(reader.GetOrdinal("Module")),
+                                DateSubmitted = reader.GetDateTime(reader.GetOrdinal("DateSubmitted")),
+                                HourlyRate = reader.GetDecimal(reader.GetOrdinal("HourlyRate")),
+                                HoursWorked = reader.GetInt32(reader.GetOrdinal("HoursWorked")),
+                                TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+                                Status = reader.GetString(reader.GetOrdinal("Status")),
+                                DocumentPath = reader.IsDBNull(reader.GetOrdinal("DocumentPath")) ? null : reader.GetString(reader.GetOrdinal("DocumentPath")),
+                                RejectionReason = reader.IsDBNull(reader.GetOrdinal("RejectionReason")) ? null : reader.GetString(reader.GetOrdinal("RejectionReason")),
+                                SubmittedBy = reader.GetString(reader.GetOrdinal("SubmittedBy")),
+                                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
+                            });
+                        }
+                    }
+                }
+            }
+            return claims;
         }
 
-        public int GetPendingClaimsCount()
+        public async Task<List<Claim>> GetPendingClaimsAsync()
         {
-            return _claims.Count(c => c.Status == "Pending");
+            var claims = new List<Claim>();
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = "SELECT * FROM Claims WHERE Status = 'Pending' ORDER BY CreatedAt";
+
+                using (var command = new SqlCommand(sql, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        claims.Add(new Claim
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            EmployeeNumber = reader.GetString(reader.GetOrdinal("EmployeeNumber")),
+                            LecturerName = reader.GetString(reader.GetOrdinal("LecturerName")),
+                            Module = reader.GetString(reader.GetOrdinal("Module")),
+                            DateSubmitted = reader.GetDateTime(reader.GetOrdinal("DateSubmitted")),
+                            HourlyRate = reader.GetDecimal(reader.GetOrdinal("HourlyRate")),
+                            HoursWorked = reader.GetInt32(reader.GetOrdinal("HoursWorked")),
+                            TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+                            Status = reader.GetString(reader.GetOrdinal("Status")),
+                            DocumentPath = reader.IsDBNull(reader.GetOrdinal("DocumentPath")) ? null : reader.GetString(reader.GetOrdinal("DocumentPath")),
+                            RejectionReason = reader.IsDBNull(reader.GetOrdinal("RejectionReason")) ? null : reader.GetString(reader.GetOrdinal("RejectionReason")),
+                            SubmittedBy = reader.GetString(reader.GetOrdinal("SubmittedBy")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
+                        });
+                    }
+                }
+            }
+            return claims;
         }
 
-        public int GetCoordinatorApprovedCount()
+        public async Task<List<Claim>> GetCoordinatorApprovedClaimsAsync()
         {
-            return _claims.Count(c => c.Status == "Coordinator Approved");
+            var claims = new List<Claim>();
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = "SELECT * FROM Claims WHERE Status = 'Coordinator Approved' ORDER BY CreatedAt";
+
+                using (var command = new SqlCommand(sql, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        claims.Add(new Claim
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            EmployeeNumber = reader.GetString(reader.GetOrdinal("EmployeeNumber")),
+                            LecturerName = reader.GetString(reader.GetOrdinal("LecturerName")),
+                            Module = reader.GetString(reader.GetOrdinal("Module")),
+                            DateSubmitted = reader.GetDateTime(reader.GetOrdinal("DateSubmitted")),
+                            HourlyRate = reader.GetDecimal(reader.GetOrdinal("HourlyRate")),
+                            HoursWorked = reader.GetInt32(reader.GetOrdinal("HoursWorked")),
+                            TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+                            Status = reader.GetString(reader.GetOrdinal("Status")),
+                            DocumentPath = reader.IsDBNull(reader.GetOrdinal("DocumentPath")) ? null : reader.GetString(reader.GetOrdinal("DocumentPath")),
+                            RejectionReason = reader.IsDBNull(reader.GetOrdinal("RejectionReason")) ? null : reader.GetString(reader.GetOrdinal("RejectionReason")),
+                            SubmittedBy = reader.GetString(reader.GetOrdinal("SubmittedBy")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
+                        });
+                    }
+                }
+            }
+            return claims;
         }
 
-        public int GetTotalClaimsCount()
+        public async Task AddClaimAsync(Claim claim)
         {
-            return _claims.Count;
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = @"
+                    INSERT INTO Claims (EmployeeNumber, LecturerName, Module, DateSubmitted, HourlyRate, HoursWorked, DocumentPath, SubmittedBy)
+                    VALUES (@EmployeeNumber, @LecturerName, @Module, @DateSubmitted, @HourlyRate, @HoursWorked, @DocumentPath, @SubmittedBy)";
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@EmployeeNumber", claim.EmployeeNumber);
+                    command.Parameters.AddWithValue("@LecturerName", claim.LecturerName);
+                    command.Parameters.AddWithValue("@Module", claim.Module);
+                    command.Parameters.AddWithValue("@DateSubmitted", claim.DateSubmitted);
+                    command.Parameters.AddWithValue("@HourlyRate", claim.HourlyRate);
+                    command.Parameters.AddWithValue("@HoursWorked", claim.HoursWorked);
+                    command.Parameters.AddWithValue("@DocumentPath", (object)claim.DocumentPath ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@SubmittedBy", claim.SubmittedBy);
+
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+        }
+
+        public async Task<bool> UpdateClaimStatusAsync(int id, string status, string rejectionReason = null)
+        {
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = @"
+                    UPDATE Claims 
+                    SET Status = @Status, 
+                        RejectionReason = @RejectionReason,
+                        UpdatedAt = GETDATE()
+                    WHERE Id = @Id";
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", id);
+                    command.Parameters.AddWithValue("@Status", status);
+                    command.Parameters.AddWithValue("@RejectionReason", (object)rejectionReason ?? DBNull.Value);
+
+                    var rowsAffected = await command.ExecuteNonQueryAsync();
+                    return rowsAffected > 0;
+                }
+            }
+        }
+
+        public async Task<decimal> GetTotalAcceptedAmountAsync()
+        {
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = "SELECT ISNULL(SUM(TotalAmount), 0) FROM Claims WHERE Status = 'Accepted'";
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    var result = await command.ExecuteScalarAsync();
+                    return result == DBNull.Value ? 0 : Convert.ToDecimal(result);
+                }
+            }
+        }
+
+        public async Task<int> GetPendingClaimsCountAsync()
+        {
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = "SELECT COUNT(*) FROM Claims WHERE Status = 'Pending'";
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    return (int)await command.ExecuteScalarAsync();
+                }
+            }
+        }
+
+        public async Task<int> GetCoordinatorApprovedCountAsync()
+        {
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = "SELECT COUNT(*) FROM Claims WHERE Status = 'Coordinator Approved'";
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    return (int)await command.ExecuteScalarAsync();
+                }
+            }
+        }
+
+        public async Task<int> GetTotalClaimsCountAsync()
+        {
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = "SELECT COUNT(*) FROM Claims";
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    return (int)await command.ExecuteScalarAsync();
+                }
+            }
+        }
+
+        public async Task<Claim> GetClaimByIdAsync(int id)
+        {
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = "SELECT * FROM Claims WHERE Id = @Id";
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", id);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            return new Claim
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                EmployeeNumber = reader.GetString(reader.GetOrdinal("EmployeeNumber")),
+                                LecturerName = reader.GetString(reader.GetOrdinal("LecturerName")),
+                                Module = reader.GetString(reader.GetOrdinal("Module")),
+                                DateSubmitted = reader.GetDateTime(reader.GetOrdinal("DateSubmitted")),
+                                HourlyRate = reader.GetDecimal(reader.GetOrdinal("HourlyRate")),
+                                HoursWorked = reader.GetInt32(reader.GetOrdinal("HoursWorked")),
+                                TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+                                Status = reader.GetString(reader.GetOrdinal("Status")),
+                                DocumentPath = reader.IsDBNull(reader.GetOrdinal("DocumentPath")) ? null : reader.GetString(reader.GetOrdinal("DocumentPath")),
+                                RejectionReason = reader.IsDBNull(reader.GetOrdinal("RejectionReason")) ? null : reader.GetString(reader.GetOrdinal("RejectionReason")),
+                                SubmittedBy = reader.GetString(reader.GetOrdinal("SubmittedBy")),
+                                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
+                            };
+                        }
+                    }
+                }
+            }
+            return null;
         }
     }
 }

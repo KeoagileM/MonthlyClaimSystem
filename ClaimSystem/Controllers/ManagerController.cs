@@ -12,29 +12,30 @@ namespace ClaimSystem.Controllers
             _claimService = claimService;
         }
 
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
             if (HttpContext.Session.GetString("Role") != "Manager")
                 return RedirectToAction("AccessDenied", "Home");
 
-            ViewBag.TotalAccepted = _claimService.GetTotalAcceptedAmount();
-            ViewBag.PendingCount = _claimService.GetPendingClaimsCount();
-            ViewBag.ApprovedCount = _claimService.GetCoordinatorApprovedCount();
-            ViewBag.TotalClaims = _claimService.GetTotalClaimsCount();
+            ViewBag.TotalAccepted = await _claimService.GetTotalAcceptedAmountAsync();
+            ViewBag.PendingCount = await _claimService.GetPendingClaimsCountAsync();
+            ViewBag.ApprovedCount = await _claimService.GetCoordinatorApprovedCountAsync();
+            ViewBag.TotalClaims = await _claimService.GetTotalClaimsCountAsync();
 
-            return View(_claimService.GetAllClaims());
+            var claims = await _claimService.GetAllClaimsAsync();
+            return View(claims);
         }
 
         [HttpPost]
-        public IActionResult Accept(int id)
+        public async Task<IActionResult> Accept(int id)
         {
             if (HttpContext.Session.GetString("Role") != "Manager")
                 return RedirectToAction("AccessDenied", "Home");
 
-            var claim = _claimService.GetClaimById(id);
+            var claim = await _claimService.GetClaimByIdAsync(id);
             if (claim != null && claim.Status == "Coordinator Approved")
             {
-                if (_claimService.UpdateClaimStatus(id, "Accepted"))
+                if (await _claimService.UpdateClaimStatusAsync(id, "Accepted"))
                 {
                     TempData["SuccessMessage"] = "Claim accepted successfully! Payment will be processed.";
                 }
@@ -45,22 +46,22 @@ namespace ClaimSystem.Controllers
             }
             else
             {
-                TempData["ErrorMessage"] = "Only coordinator-approved claims can be accepted.";
+                TempData["ErrorMessage"] = "Claim must be coordinator approved before final acceptance.";
             }
 
             return RedirectToAction("Dashboard");
         }
 
         [HttpPost]
-        public IActionResult Reject(int id, string rejectionReason)
+        public async Task<IActionResult> Reject(int id, string rejectionReason)
         {
             if (HttpContext.Session.GetString("Role") != "Manager")
                 return RedirectToAction("AccessDenied", "Home");
 
-            var claim = _claimService.GetClaimById(id);
+            var claim = await _claimService.GetClaimByIdAsync(id);
             if (claim != null && claim.Status == "Coordinator Approved")
             {
-                if (_claimService.UpdateClaimStatus(id, "Rejected", rejectionReason))
+                if (await _claimService.UpdateClaimStatusAsync(id, "Rejected", rejectionReason))
                 {
                     TempData["SuccessMessage"] = "Claim rejected successfully.";
                 }

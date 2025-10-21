@@ -12,24 +12,25 @@ namespace ClaimSystem.Controllers
             _claimService = claimService;
         }
 
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
             if (HttpContext.Session.GetString("Role") != "Coordinator")
                 return RedirectToAction("AccessDenied", "Home");
 
-            ViewBag.PendingCount = _claimService.GetPendingClaimsCount();
-            ViewBag.ApprovedCount = _claimService.GetCoordinatorApprovedCount();
+            ViewBag.PendingCount = await _claimService.GetPendingClaimsCountAsync();
+            ViewBag.ApprovedCount = await _claimService.GetCoordinatorApprovedCountAsync();
 
-            return View(_claimService.GetAllClaims());
+            var claims = await _claimService.GetAllClaimsAsync();
+            return View(claims);
         }
 
         [HttpPost]
-        public IActionResult Approve(int id)
+        public async Task<IActionResult> Approve(int id)
         {
             if (HttpContext.Session.GetString("Role") != "Coordinator")
                 return RedirectToAction("AccessDenied", "Home");
 
-            if (_claimService.UpdateClaimStatus(id, "Coordinator Approved"))
+            if (await _claimService.UpdateClaimStatusAsync(id, "Coordinator Approved"))
             {
                 TempData["SuccessMessage"] = "Claim approved successfully! Sent to manager for final approval.";
             }
@@ -42,7 +43,7 @@ namespace ClaimSystem.Controllers
         }
 
         [HttpPost]
-        public IActionResult Disapprove(int id, string rejectionReason)
+        public async Task<IActionResult> Disapprove(int id, string rejectionReason)
         {
             if (HttpContext.Session.GetString("Role") != "Coordinator")
                 return RedirectToAction("AccessDenied", "Home");
@@ -53,7 +54,7 @@ namespace ClaimSystem.Controllers
                 return RedirectToAction("Dashboard");
             }
 
-            if (_claimService.UpdateClaimStatus(id, "Coordinator Disapproved", rejectionReason))
+            if (await _claimService.UpdateClaimStatusAsync(id, "Coordinator Disapproved", rejectionReason))
             {
                 TempData["SuccessMessage"] = "Claim disapproved successfully.";
             }

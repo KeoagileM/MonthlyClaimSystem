@@ -1,13 +1,15 @@
-﻿@model IEnumerable<ClaimSystem.Models.Claim>
+﻿@model List<ClaimSystem.Models.Claim>
 @{
     ViewData["Title"] = "Coordinator Dashboard";
 }
 
+<!--The header of the coordinator-->
 <div class="dashboard-header">
     <h1>✅ Coordinator Dashboard</h1>
     <p>Welcome, @Context.Session.GetString("Username")!</p>
 </div>
 
+<!--The class for all the pending claims-->
 <div class="stats-container">
     <div class="stat-card">
         <div class="stat-icon">📋</div>
@@ -25,6 +27,7 @@
     </div>
 </div>
 
+<!--The class to review the claims-->
 <div class="card">
     <h3>📋 Claims Requiring Review</h3>
 
@@ -47,6 +50,8 @@
                     </tr>
                 </thead>
                 <tbody>
+
+                    <!--The claims that have been submitted-->
                     @foreach (var claim in Model.Where(c => c.Status == "Pending").OrderBy(c => c.DateSubmitted))
                     {
                         <tr>
@@ -65,6 +70,7 @@
                                 }
                             </td>
                             <td>
+                                <!--The class that contains the buttons to approve or disapprove-->
                                 <div class="action-buttons">
                                     <form asp-action="Approve" asp-controller="Coordinator" method="post" class="inline-form">
                                         <input type="hidden" name="id" value="@claim.Id" />
@@ -75,7 +81,7 @@
                                         <input type="hidden" name="id" value="@claim.Id" />
                                         <div class="disapprove-form">
                                             <textarea name="rejectionReason" placeholder="Reason for disapproval..."
-                                              rows="3" required class="reason-textarea"></textarea>
+                                              rows="2" required class="reason-textarea"></textarea>
                                             <button type="submit" class="btn-danger btn-sm">❌ Disapprove</button>
                                         </div>
                                     </form>
@@ -89,6 +95,7 @@
     }
     else
     {
+        <!--This happens when there is no icons-->
         <div class="empty-state">
             <div class="empty-icon">🎉</div>
             <h4>No Pending Claims</h4>
@@ -97,8 +104,10 @@
     }
 </div>
 
+<!--What happens when the statuses are pending-->
 @if (Model.Any(c => c.Status != "Pending"))
 {
+    <!--The pending statuses will be on the review history-->
     <div class="card">
         <h3>📊 Review History</h3>
         <div class="table-container">
@@ -126,7 +135,10 @@
                             <td>@claim.DateSubmitted.ToString("MMM dd, yyyy")</td>
                             <td>$@claim.TotalAmount.ToString("F2")</td>
                             <td>
-                                <span class="status-badge status-@claim.Status.ToLower().Replace(" ", "-")">
+                                @{
+                                    var statusClass = "status-" + claim.Status.ToLower().Replace(" ", "-");
+                                }
+                                <span class="status-badge @statusClass">
                                     @claim.Status
                                 </span>
                             </td>

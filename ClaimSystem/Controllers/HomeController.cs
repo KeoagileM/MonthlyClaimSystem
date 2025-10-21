@@ -1,10 +1,17 @@
-using ClaimSystem.Models;
+using ClaimSystem.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClaimSystem.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly UserService _userService;
+
+        public HomeController(UserService userService)
+        {
+            _userService = userService;
+        }
+
         public IActionResult Index()
         {
             return View();
@@ -17,11 +24,13 @@ namespace ClaimSystem.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(string username, string password, string role)
+        public async Task<IActionResult> Login(string username, string password, string role)
         {
-            if (!string.IsNullOrEmpty(username) && Users.Accounts.TryGetValue(username, out var user))
+            var isValid = await _userService.ValidateUserAsync(username, password);
+            if (isValid)
             {
-                if (user.Password == password && user.Role == role)
+                var user = await _userService.GetUserByUsernameAsync(username);
+                if (user.Role == role)
                 {
                     HttpContext.Session.SetString("Role", user.Role);
                     HttpContext.Session.SetString("Username", user.Username);

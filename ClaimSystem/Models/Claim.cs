@@ -9,10 +9,12 @@
         public DateTime DateSubmitted { get; set; }
         public decimal HourlyRate { get; set; }
         public int HoursWorked { get; set; }
-        public decimal TotalAmount => HourlyRate * HoursWorked;
+        public decimal TotalAmount { get; set; }
         public string Status { get; set; } = "Pending";
         public string DocumentPath { get; set; }
         public string RejectionReason { get; set; }
         public string SubmittedBy { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

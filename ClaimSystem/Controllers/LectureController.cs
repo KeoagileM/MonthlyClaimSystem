@@ -13,13 +13,13 @@ namespace ClaimSystem.Controllers
             _claimService = claimService;
         }
 
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
             if (HttpContext.Session.GetString("Role") != "Lecturer")
                 return RedirectToAction("AccessDenied", "Home");
 
             var username = HttpContext.Session.GetString("Username");
-            var userClaims = _claimService.GetClaimsByUser(username);
+            var userClaims = await _claimService.GetClaimsByUserAsync(username);
             return View(userClaims);
         }
 
@@ -87,7 +87,7 @@ namespace ClaimSystem.Controllers
                 SubmittedBy = HttpContext.Session.GetString("Username")
             };
 
-            _claimService.AddClaim(claim);
+            await _claimService.AddClaimAsync(claim);
 
             TempData["SuccessMessage"] = "Claim submitted successfully! Waiting for coordinator approval.";
             return RedirectToAction("Dashboard");

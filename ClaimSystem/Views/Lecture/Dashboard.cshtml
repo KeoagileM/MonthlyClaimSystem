@@ -1,55 +1,68 @@
-﻿@model IEnumerable<ClaimSystem.Models.Claim>
+﻿@model List<ClaimSystem.Models.Claim>
 @{
     ViewData["Title"] = "Lecturer Dashboard";
 }
 
+<!--The header of the Lecture-->
 <div class="dashboard-header">
     <h1>📋 Lecturer Dashboard</h1>
     <p>Welcome! Please submit your claim below.</p>
 </div>
 
+<!--The class of the form that is going to be used for getting the claims-->
 <div class="grid-2col">
     <div class="card">
         <h3>📝 Submit New Claim</h3>
         <form asp-action="SubmitClaim" asp-controller="Lecture" method="post" enctype="multipart/form-data" class="claim-form">
+
+            <!--Getting the employee numbeer-->
             <div class="form-group">
                 <label>Employee Number *</label>
                 <input type="text" name="employeeNumber" required
                        placeholder="Enter your employee number" />
             </div>
 
+            <!--Getting the Lecture name number-->
             <div class="form-group">
                 <label>Lecturer Name *</label>
                 <input type="text" name="lecturerName" required
                        placeholder="Enter your full name" />
             </div>
 
+            <!--Getting the module the lecturer lectures-->
             <div class="form-group">
                 <label>Module *</label>
                 <select name="module" required>
                     <option value="">-- Select Module --</option>
                     <option value="Programming 1A">Programming 1A</option>
                     <option value="Programming 1B">Programming 1B</option>
-                    <option value="Programming 2A">Programming 2B</option>
+                    <option value="Programming 2A">Programming 2A</option>
                     <option value="Programming 2B">Programming 2B</option>
-                    <option value="Web Development(Introduction)">Web Development(Introduction)</option>
-                    <option value="Web Development(Intermediate)">Web Development(Intermediate)</option>
-                    <option value="Web Development(Advanced)">Web Development(Advanced)</option>
+                    <option value="Web Development (Introduction)">Web Development (Introduction)</option>
+                    <option value="Web Development (Intermediate)">Web Development (Intermediate)</option>
+                    <option value="Web Development (Advanced)">Web Development (Advanced)</option>
+                    <option value="Database (Introduction)">Database (Introduction)</option>
+                    <option value="Database (Intermediate)">Database (Intermediate)</option>
+                    <option value="Database (Advanced)">Database (Advanced)</option>
                 </select>
             </div>
 
+            <!--Getting the Date of the submission-->
             <div class="form-group">
-                <label>Date of Work *</label>
+                <label>Date of Submission</label>
                 <input type="date" name="dateSubmitted" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
             </div>
 
+            
             <div class="form-row">
+                <!--Getting the hourly rate of the lecture-->
                 <div class="form-group">
-                    <label>Hourly Rate ($) *</label>
+                    <label>Hourly Rate (R) *</label>
                     <input type="number" name="hourlyRate" step="0.01" min="0" required
                            placeholder="0.00" />
                 </div>
 
+                <!--Getting the hours worked of the lecture-->
                 <div class="form-group">
                     <label>Hours Worked *</label>
                     <input type="number" name="hoursWorked" min="1" max="200" required
@@ -57,16 +70,19 @@
                 </div>
             </div>
 
+            <!--Getting the document uploaded of the lecture-->
             <div class="form-group">
                 <label>Upload Supporting Document *</label>
                 <input type="file" name="document" accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" required />
                 <small>Accepted formats: PDF, Word, JPG, PNG (Max: 10MB)</small>
             </div>
 
+            <!--The submit button for the lecture-->
             <button type="submit" class="btn-primary full-width">Submit Claim</button>
         </form>
     </div>
 
+    <!--The class for the claim history-->
     <div class="card">
         <h3>📊 My Claim History</h3>
 
@@ -100,7 +116,10 @@
                                 <td>@claim.HoursWorked</td>
                                 <td>$@claim.TotalAmount.ToString("F2")</td>
                                 <td>
-                                    <span class="status-badge status-@claim.Status.ToLower().Replace(" ", "-")">
+                                    @{
+                                        var statusClass = "status-" + claim.Status.ToLower().Replace(" ", "-");
+                                    }
+                                    <span class="status-badge @statusClass">
                                         @claim.Status
                                     </span>
                                 </td>
@@ -134,6 +153,7 @@
         }
         else
         {
+            //When empty this will happen
             <div class="empty-state">
                 <div class="empty-icon">📭</div>
                 <h4>No Claims Submitted</h4>

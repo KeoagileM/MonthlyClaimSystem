@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ClaimSystem.Models.Claim>
+﻿@model List<ClaimSystem.Models.Claim>
 @{
     ViewData["Title"] = "Manager Dashboard";
     var totalAccepted = ViewBag.TotalAccepted ?? 0M;
@@ -6,12 +6,15 @@
     var approvedCount = ViewBag.ApprovedCount ?? 0;
 }
 
+<!--The header for the manager-->
 <div class="dashboard-header">
     <h1>💼 Manager Dashboard</h1>
     <p>Welcome, @Context.Session.GetString("Username")!</p>
 </div>
 
+<!--The class of the stats-->
 <div class="stats-container">
+    <!--The total accepted value of the claims-->
     <div class="stat-card highlight">
         <div class="stat-icon">💰</div>
         <div class="stat-info">
@@ -19,6 +22,7 @@
             <p>Total Accepted Value</p>
         </div>
     </div>
+    <!--The class for the pending reviews-->
     <div class="stat-card">
         <div class="stat-icon">📋</div>
         <div class="stat-info">
@@ -26,6 +30,7 @@
             <p>Pending Review</p>
         </div>
     </div>
+    <!--The number of claims approved-->
     <div class="stat-card">
         <div class="stat-icon">✅</div>
         <div class="stat-info">
@@ -35,9 +40,11 @@
     </div>
 </div>
 
+<!--The class that contains the claims that are approved by the coordinator-->
 <div class="card">
     <h3>📋 Claims Awaiting Final Decision</h3>
 
+    <!--The manager will only be able to approve only when coordinator is approved-->
     @if (Model.Any(c => c.Status == "Coordinator Approved"))
     {
         <div class="table-container">
@@ -80,7 +87,7 @@
                                         <input type="hidden" name="id" value="@claim.Id" />
                                         <div class="reject-form">
                                             <textarea name="rejectionReason" placeholder="Reason for rejection..."
-                                              rows="3" class="reason-textarea"></textarea>
+                                              rows="2" class="reason-textarea"></textarea>
                                             <button type="submit" class="btn-danger btn-sm">❌ Reject</button>
                                         </div>
                                     </form>
@@ -94,6 +101,7 @@
     }
     else
     {
+        <!--This happens when there ae no claims-->
         <div class="empty-state">
             <div class="empty-icon">⏳</div>
             <h4>No Claims Awaiting Decision</h4>
@@ -102,6 +110,7 @@
     }
 </div>
 
+<!--All the claims that are rejected or accepted-->
 <div class="card">
     <h3>📊 All Claims Overview</h3>
     <div class="table-container">
@@ -129,7 +138,10 @@
                         <td>@claim.DateSubmitted.ToString("MMM dd, yyyy")</td>
                         <td>$@claim.TotalAmount.ToString("F2")</td>
                         <td>
-                            <span class="status-badge status-@claim.Status.ToLower().Replace(" ", "-")">
+                            @{
+                                var statusClass = "status-" + claim.Status.ToLower().Replace(" ", "-");
+                            }
+                            <span class="status-badge @statusClass">
                                 @claim.Status
                             </span>
                         </td>
