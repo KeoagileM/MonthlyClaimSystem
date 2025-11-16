@@ -204,7 +204,7 @@ namespace ClaimSystem.Services
             {
                 connection.Open();
 
-                // Create Users table
+                // Create Users table with EmployeeNumber
                 string createUsersTable = @"
                     IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Users' and xtype='U')
                     BEGIN
@@ -213,6 +213,9 @@ namespace ClaimSystem.Services
                             Username NVARCHAR(50) NOT NULL UNIQUE,
                             PasswordHash NVARCHAR(255) NOT NULL,
                             Role NVARCHAR(20) NOT NULL,
+                            FirstName NVARCHAR(50) NOT NULL,
+                            LastName NVARCHAR(50) NOT NULL,
+                            EmployeeNumber NVARCHAR(20) NOT NULL,
                             CreatedAt DATETIME2 DEFAULT GETDATE()
                         )
                     END";
@@ -265,21 +268,23 @@ namespace ClaimSystem.Services
                 if (userCount == 0)
                 {
                     string insertUsersSql = @"
-                INSERT INTO Users (Username, PasswordHash, Role) VALUES
-                ('lecturer', @lecturerPassword, 'Lecturer'),
-                ('coordinator', @coordinatorPassword, 'Coordinator'),
-                ('manager', @managerPassword, 'Manager')";
+                        INSERT INTO Users (Username, PasswordHash, Role, FirstName, LastName, EmployeeNumber) VALUES
+                        ('lecturer', '1234', 'Lecturer', 'John', 'Smith', 'EMP001'),
+                        ('coordinator', '5678', 'Coordinator', 'Sarah', 'Johnson', 'COORD001'),
+                        ('manager', '9999', 'Manager', 'Michael', 'Brown', 'MGR001')";
 
                     using (var insertCommand = new SqlCommand(insertUsersSql, connection))
                     {
-                        insertCommand.Parameters.AddWithValue("@lecturerPassword", "1234");
-                        insertCommand.Parameters.AddWithValue("@coordinatorPassword", "5678");
-                        insertCommand.Parameters.AddWithValue("@managerPassword", "9999");
                         insertCommand.ExecuteNonQuery();
                         Console.WriteLine("Default users seeded successfully!");
                     }
                 }
             }
+        }
+
+        public SqlConnection GetConnection()
+        {
+            return new SqlConnection(ConnectionString);
         }
     }
 }

@@ -4,6 +4,11 @@
 @{
     var role = HttpContextAccessor.HttpContext?.Session.GetString("Role");
     var username = HttpContextAccessor.HttpContext?.Session.GetString("Username");
+    var firstName = HttpContextAccessor.HttpContext?.Session.GetString("FirstName");
+    var lastName = HttpContextAccessor.HttpContext?.Session.GetString("LastName");
+    var displayName = !string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(lastName)
+        ? $"{firstName} {lastName}"
+        : username;
 }
 
 <!DOCTYPE html>
@@ -24,8 +29,12 @@
                 <a asp-controller="Home" asp-action="Index">Home</a>
                 @if (!string.IsNullOrEmpty(role))
                 {
-                    <span class="role-badge">@username (@role)</span>
+                    <span class="role-badge">@displayName (@role)</span>
                     <a asp-controller="Home" asp-action="Logout" class="logout-btn">Logout</a>
+                }
+                else
+                {
+                    <a asp-controller="Home" asp-action="Register" class="btn-secondary">Register</a>
                 }
             </nav>
         </div>

@@ -1,12 +1,16 @@
 ﻿@model List<ClaimSystem.Models.Claim>
 @{
     ViewData["Title"] = "Lecturer Dashboard";
+    var firstName = Context.Session.GetString("FirstName");
+    var lastName = Context.Session.GetString("LastName");
+    var employeeNumber = Context.Session.GetString("EmployeeNumber");
+    var lecturerName = $"{firstName} {lastName}";
 }
 
 <!--The header of the Lecture-->
 <div class="dashboard-header">
     <h1>Lecturer Dashboard</h1>
-    <p>Welcome! Please submit your claim below.</p>
+    <p>Welcome, @lecturerName!</p>
 </div>
 
 <!--The class of the form that is going to be used for getting the claims-->
@@ -15,23 +19,25 @@
         <h3>Submit New Claim</h3>
         <form asp-action="SubmitClaim" asp-controller="Lecture" method="post" enctype="multipart/form-data" class="claim-form">
 
-            <!--Getting the employee numbeer-->
+            <!--Display Employee Number (Auto-filled from registration)-->
             <div class="form-group">
                 <label>Employee Number</label>
-                <input type="text" name="employeeNumber" required
-                       placeholder="Enter your employee number" />
+                <input type="text" value="@employeeNumber" class="readonly-field" readonly
+                       placeholder="Your employee number" />
+                <small class="text-muted">This is automatically filled from your registration details</small>
             </div>
 
-            <!--Getting the Lecture name number-->
+            <!--Display Lecturer Name (Auto-filled from registration)-->
             <div class="form-group">
                 <label>Lecturer Name</label>
-                <input type="text" name="lecturerName" required
-                       placeholder="Enter your full name" />
+                <input type="text" value="@lecturerName" class="readonly-field" readonly
+                       placeholder="Your registered name" />
+                <small class="text-muted">This is automatically filled from your registration details</small>
             </div>
 
             <!--Getting the module the lecturer lectures-->
             <div class="form-group">
-                <label>Module</label>
+                <label>Module *</label>
                 <select name="module" required>
                     <option value="">-- Select Module --</option>
                     <option value="Programming 1A">Programming 1A</option>
@@ -53,7 +59,7 @@
                 <input type="date" name="dateSubmitted" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
             </div>
 
-            
+
             <div class="form-row">
                 <!--Getting the hourly rate of the lecture-->
                 <div class="form-group">

@@ -1,6 +1,7 @@
-﻿using ClaimSystem.Models;
-using System.Data.SqlClient;
-using System.Web.Helpers;
+﻿using System.Data.SqlClient;
+using ClaimSystem.Models;
+using System.Diagnostics;
+using System.ComponentModel;
 
 namespace ClaimSystem.Services
 {
@@ -37,7 +38,7 @@ namespace ClaimSystem.Services
                     // Switch to ClaimSystem database
                     connection.ChangeDatabase("ClaimSystem");
 
-                    // Create Users table
+                    // Create Users table WITH EMPLOYEENUMBER
                     string createUsersTable = @"
                         IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Users' and xtype='U')
                         BEGIN
@@ -46,6 +47,9 @@ namespace ClaimSystem.Services
                                 Username NVARCHAR(50) NOT NULL UNIQUE,
                                 PasswordHash NVARCHAR(255) NOT NULL,
                                 Role NVARCHAR(20) NOT NULL,
+                                FirstName NVARCHAR(50) NOT NULL,
+                                LastName NVARCHAR(50) NOT NULL,
+                                EmployeeNumber NVARCHAR(20) NOT NULL,
                                 CreatedAt DATETIME2 DEFAULT GETDATE()
                             )
                         END";
@@ -90,16 +94,13 @@ namespace ClaimSystem.Services
                         if (userCount == 0)
                         {
                             string insertUsersSql = @"
-                                INSERT INTO Users (Username, PasswordHash, Role) VALUES
-                                ('lecturer', @lecturerHash, 'Lecturer'),
-                                ('coordinator', @coordinatorHash, 'Coordinator'),
-                                ('manager', @managerHash, 'Manager')";
+                                INSERT INTO Users (Username, PasswordHash, Role, FirstName, LastName, EmployeeNumber) VALUES
+                                ('lecturer', '1234', 'Lecturer', 'John', 'Smith', 'EMP001'),
+                                ('coordinator', '5678', 'Coordinator', 'Sarah', 'Johnson', 'COORD001'),
+                                ('manager', '9999', 'Manager', 'Michael', 'Brown', 'MGR001')";
 
                             using (var insertCommand = new SqlCommand(insertUsersSql, connection))
                             {
-                                insertCommand.Parameters.AddWithValue("@lecturerHash", BCrypt.Net.BCrypt.HashPassword("1234"));
-                                insertCommand.Parameters.AddWithValue("@coordinatorHash", BCrypt.Net.BCrypt.HashPassword("5678"));
-                                insertCommand.Parameters.AddWithValue("@managerHash", BCrypt.Net.BCrypt.HashPassword("9999"));
                                 insertCommand.ExecuteNonQuery();
                             }
                         }

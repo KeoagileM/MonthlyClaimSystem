@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Create New Account</h2>
+            <p>Register for the Claim Management System</p>
+        </div>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-error">
+                @ViewBag.Error
+            </div>
+        }
+
+        <form method="post" asp-action="Register" asp-controller="Home">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name *</label>
+                    <input type="text" id="firstName" name="firstName" required
+                           placeholder="Enter your first name" />
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name *</label>
+                    <input type="text" id="lastName" name="lastName" required
+                           placeholder="Enter your last name" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="employeeNumber">Employee Number *</label>
+                <input type="text" id="employeeNumber" name="employeeNumber" required
+                       placeholder="Enter your employee number" />
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username *</label>
+                <input type="text" id="username" name="username" required
+                       placeholder="Choose a username" />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" required
+                           placeholder="Enter password (min 4 chars)" />
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password *</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required
+                           placeholder="Confirm your password" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Role *</label>
+                <select id="role" name="role" required>
+                    <option value="">-- Select Your Role --</option>
+                    <option value="Lecturer">Lecturer</option>
+                    <option value="Coordinator">Programme Coordinator</option>
+                    <option value="Manager">Programme Manager</option>
+                </select>
+            </div>
+
+            <button type="submit" class="login-btn">Register</button>
+        </form>
+
+        <div class="login-footer">
+            <p>Already have an account? <a href="/Home/Login" class="back-link">Login here</a></p>
+            <a href="/" class="back-link">← Back to Home</a>
+        </div>
+    </div>
+</div>

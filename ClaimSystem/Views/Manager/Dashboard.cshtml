@@ -9,9 +9,8 @@
 <!--The header for the manager-->
 <div class="dashboard-header">
     <h1>Manager Dashboard</h1>
-    <p>Welcome, @Context.Session.GetString("Username")!</p>
+    <p>Welcome, @Context.Session.GetString("FirstName") @Context.Session.GetString("LastName")!</p>
 </div>
-
 <!--The class of the stats-->
 <div class="stats-container">
     <!--The total accepted value of the claims-->

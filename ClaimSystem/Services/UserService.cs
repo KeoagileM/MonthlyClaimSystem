@@ -14,7 +14,7 @@ namespace ClaimSystem.Services
 
         private SqlConnection GetConnection()
         {
-            return new SqlConnection(_dbServices.ConnectionString);
+            return _dbServices.GetConnection();
         }
 
         public async Task<User> GetUserByUsernameAsync(string username)
@@ -38,6 +38,9 @@ namespace ClaimSystem.Services
                                 Username = reader.GetString(reader.GetOrdinal("Username")),
                                 PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
                                 Role = reader.GetString(reader.GetOrdinal("Role")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                EmployeeNumber = reader.GetString(reader.GetOrdinal("EmployeeNumber")),
                                 CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
                             };
                         }
@@ -52,10 +55,59 @@ namespace ClaimSystem.Services
             var user = await GetUserByUsernameAsync(username);
             if (user != null)
             {
-                // Compare plain text passwords instead of using BCrypt
+                // Compare plain text passwords
                 return password == user.PasswordHash;
             }
             return false;
         }
+
+        public async Task<bool> RegisterUserAsync(string username, string password, string role, string firstName, string lastName, string employeeNumber)
+        {
+            // Check if username already exists
+            var existingUser = await GetUserByUsernameAsync(username);
+            if (existingUser != null)
+            {
+                return false; // Username already exists
+            }
+
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = @"
+            INSERT INTO Users (Username, PasswordHash, Role, FirstName, LastName, EmployeeNumber)
+            VALUES (@Username, @PasswordHash, @Role, @FirstName, @LastName, @EmployeeNumber)";
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@Username", username);
+                    command.Parameters.AddWithValue("@PasswordHash", password);
+                    command.Parameters.AddWithValue("@Role", role);
+                    command.Parameters.AddWithValue("@FirstName", firstName);
+                    command.Parameters.AddWithValue("@LastName", lastName);
+                    command.Parameters.AddWithValue("@EmployeeNumber", employeeNumber);
+
+                    var rowsAffected = await command.ExecuteNonQueryAsync();
+                    return rowsAffected > 0;
+                }
+            }
+        }
+
+        public async Task<bool> UsernameExistsAsync(string username)
+        {
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = "SELECT COUNT(*) FROM Users WHERE Username = @Username";
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@Username", username);
+                    var count = (int)await command.ExecuteScalarAsync();
+                    return count > 0;
+                }
+            }
+        }
+
+
     }
 }

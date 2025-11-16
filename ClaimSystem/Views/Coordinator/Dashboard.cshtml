@@ -6,9 +6,8 @@
 <!--The header of the coordinator-->
 <div class="dashboard-header">
     <h1>Coordinator Dashboard</h1>
-    <p>Welcome, @Context.Session.GetString("Username")!</p>
+    <p>Welcome, @Context.Session.GetString("FirstName") @Context.Session.GetString("LastName")!</p>
 </div>
-
 <!--The class for all the pending claims-->
 <div class="stats-container">
     <div class="stat-card">
