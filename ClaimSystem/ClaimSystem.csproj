@@ -18,6 +18,8 @@
 		<Content Include="Models\**\*.cs" />
 		<Content Include="Services\**\*.cs" />
 		<Content Include="Views\**\*" />
+		<Content Remove="Controllers\HrController.cs" />
+		<Content Remove="Models\HrReports.cs" />
 		<Content Include="Program.cs" />
 		<Content Include="appsettings.json" />
 	</ItemGroup>

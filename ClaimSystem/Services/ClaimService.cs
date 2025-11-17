@@ -1,6 +1,7 @@
 ﻿using System.Data.SqlClient;
 using ClaimSystem.Models;
 
+
 namespace ClaimSystem.Services
 {
     public class ClaimService
@@ -14,7 +15,7 @@ namespace ClaimSystem.Services
 
         private SqlConnection GetConnection()
         {
-            return new SqlConnection(_dbServices.ConnectionString);
+            return _dbServices.GetConnection();
         }
 
         public async Task<List<Claim>> GetAllClaimsAsync()
@@ -303,6 +304,79 @@ namespace ClaimSystem.Services
                 }
             }
             return null;
+        }
+
+        // HR Methods
+        public async Task<HrReports> GenerateHrReportAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            var report = new HrReports();
+
+            // Get approved claims within date range
+            var allClaims = await GetAllClaimsAsync();
+            var approvedClaims = allClaims.Where(c => c.Status == "Accepted").ToList();
+
+            if (startDate.HasValue)
+                approvedClaims = approvedClaims.Where(c => c.DateSubmitted >= startDate.Value).ToList();
+
+            if (endDate.HasValue)
+                approvedClaims = approvedClaims.Where(c => c.DateSubmitted <= endDate.Value).ToList();
+
+            report.ApprovedClaims = approvedClaims.OrderByDescending(c => c.DateSubmitted).ToList();
+            report.TotalAmount = approvedClaims.Sum(c => c.TotalAmount);
+            report.TotalClaims = approvedClaims.Count;
+
+            // Get total lecturers
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = "SELECT COUNT(*) FROM Users WHERE Role = 'Lecturer'";
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    report.TotalLecturers = (int)await command.ExecuteScalarAsync();
+                }
+            }
+
+            return report;
+        }
+
+        public async Task<List<Claim>> GetClaimsByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            var claims = new List<Claim>();
+            using (var connection = GetConnection())
+            {
+                await connection.OpenAsync();
+                string sql = "SELECT * FROM Claims WHERE DateSubmitted BETWEEN @StartDate AND @EndDate ORDER BY DateSubmitted DESC";
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@StartDate", startDate);
+                    command.Parameters.AddWithValue("@EndDate", endDate);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            claims.Add(new Claim
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                EmployeeNumber = reader.GetString(reader.GetOrdinal("EmployeeNumber")),
+                                LecturerName = reader.GetString(reader.GetOrdinal("LecturerName")),
+                                Module = reader.GetString(reader.GetOrdinal("Module")),
+                                DateSubmitted = reader.GetDateTime(reader.GetOrdinal("DateSubmitted")),
+                                HourlyRate = reader.GetDecimal(reader.GetOrdinal("HourlyRate")),
+                                HoursWorked = reader.GetInt32(reader.GetOrdinal("HoursWorked")),
+                                TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+                                Status = reader.GetString(reader.GetOrdinal("Status")),
+                                DocumentPath = reader.IsDBNull(reader.GetOrdinal("DocumentPath")) ? null : reader.GetString(reader.GetOrdinal("DocumentPath")),
+                                RejectionReason = reader.IsDBNull(reader.GetOrdinal("RejectionReason")) ? null : reader.GetString(reader.GetOrdinal("RejectionReason")),
+                                SubmittedBy = reader.GetString(reader.GetOrdinal("SubmittedBy")),
+                                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
+                            });
+                        }
+                    }
+                }
+            }
+            return claims;
         }
     }
 }

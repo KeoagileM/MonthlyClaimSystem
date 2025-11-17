@@ -4,13 +4,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
-// Increase file upload limits
-builder.Services.Configure<IISServerOptions>(options =>
-{
-    options.MaxRequestBodySize = 10485760; // 10MB
-});
-
 builder.Services.AddSingleton<DatabaseServices>();
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<ClaimService>();
@@ -32,15 +25,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(new StaticFileOptions
-{
-    ServeUnknownFileTypes = true // Allow serving document files
-});
-
+app.UseStaticFiles();
 app.UseRouting();
-
 app.UseSession();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(

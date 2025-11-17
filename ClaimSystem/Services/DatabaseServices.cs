@@ -204,7 +204,7 @@ namespace ClaimSystem.Services
             {
                 connection.Open();
 
-                // Create Users table with EmployeeNumber
+                // Create Users table with HR fields
                 string createUsersTable = @"
                     IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Users' and xtype='U')
                     BEGIN
@@ -216,7 +216,11 @@ namespace ClaimSystem.Services
                             FirstName NVARCHAR(50) NOT NULL,
                             LastName NVARCHAR(50) NOT NULL,
                             EmployeeNumber NVARCHAR(20) NOT NULL,
-                            CreatedAt DATETIME2 DEFAULT GETDATE()
+                            Email NVARCHAR(100) NULL,
+                            PhoneNumber NVARCHAR(20) NULL,
+                            Department NVARCHAR(50) NULL,
+                            CreatedAt DATETIME2 DEFAULT GETDATE(),
+                            UpdatedAt DATETIME2 DEFAULT GETDATE()
                         )
                     END";
 
@@ -268,10 +272,11 @@ namespace ClaimSystem.Services
                 if (userCount == 0)
                 {
                     string insertUsersSql = @"
-                        INSERT INTO Users (Username, PasswordHash, Role, FirstName, LastName, EmployeeNumber) VALUES
-                        ('lecturer', '1234', 'Lecturer', 'John', 'Smith', 'EMP001'),
-                        ('coordinator', '5678', 'Coordinator', 'Sarah', 'Johnson', 'COORD001'),
-                        ('manager', '9999', 'Manager', 'Michael', 'Brown', 'MGR001')";
+                        INSERT INTO Users (Username, PasswordHash, Role, FirstName, LastName, EmployeeNumber, Email, PhoneNumber, Department) VALUES
+                        ('lecturer', '1234', 'Lecturer', 'John', 'Smith', 'EMP001', 'john.smith@university.com', '+27 11 123 4567', 'Computer Science'),
+                        ('coordinator', '5678', 'Coordinator', 'Sarah', 'Johnson', 'COORD001', 'sarah.johnson@university.com', '+27 11 123 4568', 'IT Department'),
+                        ('manager', '9999', 'Manager', 'Michael', 'Brown', 'MGR001', 'michael.brown@university.com', '+27 11 123 4569', 'Management'),
+                        ('hr', 'hr123', 'HR', 'Jennifer', 'Wilson', 'HR001', 'jennifer.wilson@university.com', '+27 11 123 4570', 'Human Resources')";
 
                     using (var insertCommand = new SqlCommand(insertUsersSql, connection))
                     {

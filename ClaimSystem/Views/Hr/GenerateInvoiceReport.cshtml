@@ -1,0 +1,121 @@
+﻿@model ClaimSystem.Models.HrReports
+@{
+    ViewData["Title"] = "Generate Invoice Report";
+}
+
+<div class="dashboard-header">
+    <h1>Generate Invoice Report</h1>
+    <p>Create payment invoices for approved claims</p>
+</div>
+
+<div class="card">
+    <h3>📋 Select Date Range for Invoice Generation</h3>
+    <form method="post" asp-action="DownloadInvoiceReport" class="form-row">
+        <div class="form-group">
+            <label>Start Date *</label>
+            <input type="date" name="startDate" value="@DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd")" required class="form-control" />
+        </div>
+        <div class="form-group">
+            <label>End Date *</label>
+            <input type="date" name="endDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required class="form-control" />
+        </div>
+        <div class="form-group">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn-primary full-width">Generate & Download Invoice</button>
+        </div>
+    </form>
+</div>
+
+@if (Model.ApprovedClaims.Any())
+{
+    <div class="card">
+        <h3>📊 Recent Approved Claims (Last 30 Days)</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Claim ID</th>
+                        <th>Lecturer</th>
+                        <th>Employee No.</th>
+                        <th>Module</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in Model.ApprovedClaims.Take(10))
+                    {
+                        <tr>
+                            <td>@claim.Id</td>
+                            <td>@claim.LecturerName</td>
+                            <td>@claim.EmployeeNumber</td>
+                            <td>@claim.Module</td>
+                            <td>@claim.DateSubmitted.ToString("MMM dd, yyyy")</td>
+                            <td>R @claim.TotalAmount.ToString("F2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="text-center" style="margin-top: 1rem;">
+            <small class="text-muted">Showing 10 most recent claims. Use the form above to generate full reports.</small>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h4>No Approved Claims</h4>
+            <p>There are no approved claims available for invoice generation.</p>
+        </div>
+    </div>
+}
+
+<div class="card">
+    <h3>💡 Quick Invoice Tips</h3>
+    <div class="form-row">
+        <div class="form-group">
+            <div class="tip-card">
+                <strong>Monthly Reports</strong>
+                <p>Generate invoices at the end of each month for payroll processing.</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="tip-card">
+                <strong>Batch Processing</strong>
+                <p>Process all claims within a date range for efficient payment.</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="tip-card">
+                <strong>Print Format</strong>
+                <p>Invoices are generated in print-friendly format for official records.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tip-card {
+        background: var(--gradient-hover);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--medium-gray);
+        height: 100%;
+    }
+
+        .tip-card strong {
+            color: var(--charcoal);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .tip-card p {
+            color: var(--dark-gray);
+            font-size: 0.875rem;
+            margin: 0;
+        }
+</style>

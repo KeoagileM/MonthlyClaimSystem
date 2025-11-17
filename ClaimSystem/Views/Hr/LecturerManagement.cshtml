@@ -1,0 +1,162 @@
+﻿@model List<ClaimSystem.Models.User>
+@{
+    ViewData["Title"] = "Lecturer Management";
+}
+
+<div class="dashboard-header">
+    <h1>Lecturer Management</h1>
+    <p>Manage lecturer information and contact details</p>
+</div>
+
+<div class="card">
+    <h3>👨‍🏫 Lecturer Directory</h3>
+
+    @if (Model.Any())
+    {
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Employee No.</th>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Department</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var lecturer in Model)
+                    {
+                        <tr>
+                            <td>@lecturer.EmployeeNumber</td>
+                            <td>@lecturer.FirstName @lecturer.LastName</td>
+                            <td>@lecturer.Username</td>
+                            <td>@(lecturer.Email ?? "Not set")</td>
+                            <td>@(lecturer.PhoneNumber ?? "Not set")</td>
+                            <td>@(lecturer.Department ?? "Not set")</td>
+                            <td>@lecturer.UpdatedAt.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                <button type="button" class="btn-sm"
+                                        onclick="editLecturer('@lecturer.Username', '@lecturer.FirstName', '@lecturer.LastName', '@lecturer.EmployeeNumber', '@lecturer.Email', '@lecturer.PhoneNumber', '@lecturer.Department')">
+                                    Edit
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">👨‍🏫</div>
+            <h4>No Lecturers Found</h4>
+            <p>There are no lecturers registered in the system.</p>
+        </div>
+    }
+</div>
+
+<!-- Edit Lecturer Modal -->
+<div id="editModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="card">
+            <h3>Edit Lecturer Information</h3>
+            <form id="editForm" asp-action="UpdateLecturer" method="post">
+                <input type="hidden" id="editUsername" name="Username" />
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name *</label>
+                        <input type="text" id="editFirstName" name="FirstName" required class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name *</label>
+                        <input type="text" id="editLastName" name="LastName" required class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Employee Number *</label>
+                        <input type="text" id="editEmployeeNumber" name="EmployeeNumber" required class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input type="text" id="editDepartment" name="Department" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="editEmail" name="Email" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="editPhoneNumber" name="PhoneNumber" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <button type="submit" class="btn-primary">Update Information</button>
+                        <button type="button" onclick="closeModal()" class="btn-secondary">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function editLecturer(username, firstName, lastName, employeeNumber, email, phoneNumber, department) {
+        document.getElementById('editUsername').value = username;
+        document.getElementById('editFirstName').value = firstName;
+        document.getElementById('editLastName').value = lastName;
+        document.getElementById('editEmployeeNumber').value = employeeNumber;
+        document.getElementById('editEmail').value = email || '';
+        document.getElementById('editPhoneNumber').value = phoneNumber || '';
+        document.getElementById('editDepartment').value = department || '';
+
+        document.getElementById('editModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        var modal = document.getElementById('editModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+
+<style>
+    .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+        background-color: var(--pure-white);
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 1rem;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+</style>

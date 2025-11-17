@@ -24,7 +24,6 @@ namespace ClaimSystem.Controllers
         }
 
         [HttpPost]
-        [HttpPost]
         public async Task<IActionResult> Login(string username, string password, string role)
         {
             var isValid = await _userService.ValidateUserAsync(username, password);
@@ -44,6 +43,7 @@ namespace ClaimSystem.Controllers
                         "Lecturer" => RedirectToAction("Dashboard", "Lecture"),
                         "Coordinator" => RedirectToAction("Dashboard", "Coordinator"),
                         "Manager" => RedirectToAction("Dashboard", "Manager"),
+                        "HR" => RedirectToAction("Dashboard", "Hr"),
                         _ => RedirectToAction("Index")
                     };
                 }
@@ -60,14 +60,24 @@ namespace ClaimSystem.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(string username, string password, string confirmPassword, string role, string firstName, string lastName, string employeeNumber)
+        public async Task<IActionResult> Register(
+            string username,
+            string password,
+            string confirmPassword,
+            string role,
+            string firstName,
+            string lastName,
+            string employeeNumber,
+            string email,
+            string phoneNumber,
+            string department)
         {
             // Validate input
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password) ||
                 string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) ||
                 string.IsNullOrWhiteSpace(employeeNumber))
             {
-                ViewBag.Error = "All fields are required.";
+                ViewBag.Error = "All required fields must be filled.";
                 return View();
             }
 
@@ -90,8 +100,10 @@ namespace ClaimSystem.Controllers
                 return View();
             }
 
-            // Register the user with employee number
-            var success = await _userService.RegisterUserAsync(username, password, role, firstName, lastName, employeeNumber);
+            // Register the user with all fields
+            var success = await _userService.RegisterUserAsync(
+                username, password, role, firstName, lastName, employeeNumber, email, phoneNumber, department);
+
             if (success)
             {
                 TempData["SuccessMessage"] = "Registration successful! Please login with your credentials.";

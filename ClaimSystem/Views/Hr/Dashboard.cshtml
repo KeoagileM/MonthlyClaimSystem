@@ -1,0 +1,166 @@
+﻿@model ClaimSystem.Models.HrReports
+@{
+    ViewData["Title"] = "HR Dashboard";
+}
+
+<div class="dashboard-header">
+    <h1>HR Dashboard</h1>
+    <p>Automated Claim Processing & Lecturer Management</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-container">
+    <div class="stat-card highlight">
+        <div class="stat-icon">💰</div>
+        <div class="stat-info">
+            <h3>R @Model.TotalAmount.ToString("F2")</h3>
+            <p>Total Approved Amount</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-info">
+            <h3>@Model.TotalClaims</h3>
+            <p>Approved Claims</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">👨‍🏫</div>
+        <div class="stat-info">
+            <h3>@Model.TotalLecturers</h3>
+            <p>Total Lecturers</p>
+        </div>
+    </div>
+</div>
+
+<!-- Report Generation -->
+<div class="card">
+    <h3>📊 Generate Payment Report</h3>
+    <form asp-action="GenerateReport" method="post" class="form-row">
+        <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" name="startDate" value="@DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label>End Date</label>
+            <input type="date" name="endDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn-primary">Generate Report</button>
+            <button type="button" onclick="downloadInvoice()" class="btn-success">Download Invoice</button>
+        </div>
+    </form>
+</div>
+
+<!-- Approved Claims for Payment -->
+<div class="card">
+    <h3>✅ Approved Claims Ready for Payment</h3>
+
+    @if (Model.ApprovedClaims.Any())
+    {
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Claim ID</th>
+                        <th>Lecturer</th>
+                        <th>Employee No.</th>
+                        <th>Module</th>
+                        <th>Date</th>
+                        <th>Hours</th>
+                        <th>Rate</th>
+                        <th>Total Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in Model.ApprovedClaims)
+                    {
+                        <tr>
+                            <td>@claim.Id</td>
+                            <td>@claim.LecturerName</td>
+                            <td>@claim.EmployeeNumber</td>
+                            <td>@claim.Module</td>
+                            <td>@claim.DateSubmitted.ToString("MMM dd, yyyy")</td>
+                            <td>@claim.HoursWorked</td>
+                            <td>R @claim.HourlyRate.ToString("F2")</td>
+                            <td><strong>R @claim.TotalAmount.ToString("F2")</strong></td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(claim.DocumentPath))
+                                {
+                                    <a href="@claim.DocumentPath" target="_blank" class="btn-sm">View Doc</a>
+                                }
+                                <a asp-action="GenerateInvoiceReport" class="btn-success btn-sm">Invoice</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="7" style="text-align: right;"><strong>Total:</strong></td>
+                        <td><strong>R @Model.TotalAmount.ToString("F2")</strong></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h4>No Approved Claims</h4>
+            <p>There are no approved claims ready for payment processing.</p>
+        </div>
+    }
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+    <h3>⚡ Quick Actions</h3>
+    <div class="form-row">
+        <div class="form-group">
+            <a asp-action="LecturerManagement" class="btn-primary full-width">Manage Lecturers</a>
+        </div>
+        <div class="form-group">
+            <a asp-action="GenerateInvoiceReport" class="btn-success full-width">Generate All Invoices</a>
+        </div>
+        <div class="form-group">
+            <button type="button" onclick="exportToExcel()" class="btn-secondary full-width">Export to Excel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function downloadInvoice() {
+        var startDate = document.querySelector('input[name="startDate"]').value;
+        var endDate = document.querySelector('input[name="endDate"]').value;
+
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates.');
+            return;
+        }
+
+        // Open invoice in new tab for printing/download
+        var url = '@Url.Action("DownloadInvoiceReport", "Hr")' + '?startDate=' + startDate + '&endDate=' + endDate;
+        window.open(url, '_blank');
+    }
+
+    function exportToExcel() {
+        // Get date values from the form
+        var startDate = document.querySelector('input[name="startDate"]').value;
+        var endDate = document.querySelector('input[name="endDate"]').value;
+
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates before exporting.');
+            return;
+        }
+
+        // Show loading message
+        alert('Excel export feature would generate a spreadsheet file.\n\nIn a real application, this would:\n1. Download an Excel file (.xlsx)\n2. Include all claim data\n3. Format for accounting systems\n4. Include summary totals\n\nDates selected: ' + startDate + ' to ' + endDate);
+
+        // In a real implementation, you would call a controller method
+        // window.location.href = '@Url.Action("ExportToExcel", "Hr")' + '?startDate=' + startDate + '&endDate=' + endDate;
+    }
+</script>
