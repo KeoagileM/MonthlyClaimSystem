@@ -33,25 +33,6 @@
     </div>
 </div>
 
-<!-- Report Generation -->
-<div class="card">
-    <h3>📊 Generate Payment Report</h3>
-    <form asp-action="GenerateReport" method="post" class="form-row">
-        <div class="form-group">
-            <label>Start Date</label>
-            <input type="date" name="startDate" value="@DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd")" class="form-control" />
-        </div>
-        <div class="form-group">
-            <label>End Date</label>
-            <input type="date" name="endDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
-        </div>
-        <div class="form-group">
-            <label>&nbsp;</label>
-            <button type="submit" class="btn-primary">Generate Report</button>
-            <button type="button" onclick="downloadInvoice()" class="btn-success">Download Invoice</button>
-        </div>
-    </form>
-</div>
 
 <!-- Approved Claims for Payment -->
 <div class="card">
@@ -91,7 +72,6 @@
                                 {
                                     <a href="@claim.DocumentPath" target="_blank" class="btn-sm">View Doc</a>
                                 }
-                                <a asp-action="GenerateInvoiceReport" class="btn-success btn-sm">Invoice</a>
                             </td>
                         </tr>
                     }
